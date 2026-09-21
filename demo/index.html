@@ -104,13 +104,13 @@
               <span class="toolbar-desc">Кликните на любой узел для просмотра внутренних метрик и конфигурации</span>
             </div>
             <div class="toolbar-actions">
-              <button class="btn btn-sm btn-primary" id="btnTestFlow" onclick="window.runTopologyTest && window.runTopologyTest()">
+              <button class="btn btn-sm btn-primary" id="btnTestFlow">
                 <span>▶️ Запустить тестовый запрос</span>
               </button>
-              <button class="btn btn-sm btn-danger" id="btnToggleOverload" onclick="window.toggleOverload && window.toggleOverload()">
+              <button class="btn btn-sm btn-danger" id="btnToggleOverload">
                 <span>💥 Имитировать отказ Qwen-72B</span>
               </button>
-              <button class="btn btn-sm btn-secondary" id="btnResetTopology" onclick="window.resetTopology && window.resetTopology()">
+              <button class="btn btn-sm btn-secondary" id="btnResetTopology">
                 <span>🔄 Сброс</span>
               </button>
             </div>
@@ -427,11 +427,11 @@
               </div>
 
               <div class="form-actions">
-                <button class="btn btn-primary btn-lg" id="btnRunSim" onclick="window.runSimulator && window.runSimulator()">
+                <button class="btn btn-primary btn-lg" id="btnRunSim">
                   <span class="btn-icon">⚡</span>
                   <span id="btnRunSimText">Отправить через ALFA Gateway</span>
                 </button>
-                <button class="btn btn-secondary" id="btnClearSim" onclick="window.clearSimulator && window.clearSimulator()">Очистить</button>
+                <button class="btn btn-secondary" id="btnClearSim">Очистить</button>
               </div>
             </div>
           </div>
@@ -767,6 +767,6 @@
 
   </div>
 
-  <script src="app.js?v=3.2"></script>
+  <script src="app.js?v=4.0"></script>
 </body>
 </html>

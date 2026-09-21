@@ -266,23 +266,33 @@ function initAlfaApp() {
   const btnTestFlow = document.getElementById('btnTestFlow');
   const btnResetTopology = document.getElementById('btnResetTopology');
 
-  btnTestFlow.addEventListener('click', () => {
-    // Автоматически определяем, сломан ли Tier-1
+  function handleTestFlow() {
     const isOverloaded = state.circuitBreaker === 'OPEN' || state.isOverloaded;
     runTopologyPacketAnimation(isOverloaded);
-  });
+  }
+
+  function handleResetTopology() {
+    healCircuitBreaker();
+    document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active-flow'));
+    addLog('TOPOLOGY', 'Топология полностью сброшена в штатный режим работы.', 'info');
+  }
+
+  if (btnTestFlow) {
+    btnTestFlow.onclick = handleTestFlow;
+  }
 
   if (btnResetTopology) {
-    btnResetTopology.addEventListener('click', () => {
-      healCircuitBreaker();
-      document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active-flow'));
-      addLog('TOPOLOGY', 'Топология полностью сброшена в штатный режим работы.', 'info');
-    });
+    btnResetTopology.onclick = handleResetTopology;
   }
 
   function runTopologyPacketAnimation(isFallback = null) {
     // Вычисляем целевой узел: если передан флаг или текущий статус системы OPEN -> отправляем на Tier-2!
     const fallbackActive = isFallback !== null ? isFallback : (state.circuitBreaker === 'OPEN' || state.isOverloaded);
+
+    if (btnTestFlow) {
+      btnTestFlow.disabled = true;
+      btnTestFlow.innerHTML = '<span>⚡ Передача пакета...</span>';
+    }
 
     if (fallbackActive) {
       addLog('ROUTER', '⚠️ Основной пул Tier-1 (Qwen-72B) перегружен! Circuit Breaker перенаправляет поток на резервный Tier-2 (Qwen-32B).', 'cb');
@@ -352,11 +362,20 @@ function initAlfaApp() {
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        packetLayer.removeChild(circle);
+        if (packetLayer && packetLayer.contains(circle)) {
+          packetLayer.removeChild(circle);
+        }
         if (fallbackActive) {
           addLog('CIRCUIT-BREAKER', '✅ Запрос успешно выполнен на СВОБОДНОМ резервном узле Qwen-2.5-32B (Tier-2) за 142 мс!', 'cb');
         } else {
           addLog('TRANSACTION', '✅ Запрос успешно выполнен на основном узле Qwen-2.5-72B (Tier-1) за 184 мс.', 'info');
+        }
+        if (btnTestFlow) {
+          btnTestFlow.innerHTML = `<span>✅ Доставлено (${fallbackActive ? '142ms ➔ 32B' : '184ms ➔ 72B'})</span>`;
+          setTimeout(() => {
+            btnTestFlow.disabled = false;
+            btnTestFlow.innerHTML = '<span>▶️ Запустить тестовый запрос</span>';
+          }, 1200);
         }
       }
     }
@@ -372,14 +391,18 @@ function initAlfaApp() {
   const tier1LoadBar = document.getElementById('tier1LoadBar');
   const nodeRouterStatus = document.getElementById('nodeRouterStatus');
 
-  btnToggleOverload.addEventListener('click', () => {
+  function handleToggleOverload() {
     state.isOverloaded = !state.isOverloaded;
     if (state.isOverloaded) {
       tripCircuitBreaker();
     } else {
       healCircuitBreaker();
     }
-  });
+  }
+
+  if (btnToggleOverload) {
+    btnToggleOverload.onclick = handleToggleOverload;
+  }
 
   // =========================================================================
   // 4. ИНТЕРАКТИВНАЯ ПЕСОЧНИЦА ЗАПРОСОВ (SIMULATOR - ВКЛАДКА 2)
@@ -1008,32 +1031,12 @@ function initAlfaApp() {
     }
   }, 3000);
 
-  // Регистрация глобальных методов для надежности и прямого вызова из HTML onclick
-  window.runTopologyTest = () => {
-    const isOverloaded = state.circuitBreaker === 'OPEN' || state.isOverloaded;
-    runTopologyPacketAnimation(isOverloaded);
-  };
-  window.toggleOverload = () => {
-    state.isOverloaded = !state.isOverloaded;
-    if (state.isOverloaded) {
-      tripCircuitBreaker();
-    } else {
-      healCircuitBreaker();
-    }
-  };
-  window.resetTopology = () => {
-    healCircuitBreaker();
-    document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active-flow'));
-    addLog('TOPOLOGY', 'Топология полностью сброшена в штатный режим работы.', 'info');
-  };
+  // Регистрация глобальных методов
+  window.runTopologyTest = handleTestFlow;
+  window.toggleOverload = handleToggleOverload;
+  window.resetTopology = handleResetTopology;
   window.tripCircuitBreaker = tripCircuitBreaker;
   window.healCircuitBreaker = healCircuitBreaker;
-  window.runSimulator = () => {
-    if (btnRunSim) btnRunSim.click();
-  };
-  window.clearSimulator = () => {
-    if (btnClearSim) btnClearSim.click();
-  };
 }
 
 // Гарантированная инициализация

@@ -455,7 +455,7 @@ body {
   width: 1360px;
   height: 620px;
   pointer-events: none;
-  z-index: 1;
+  z-index: 10; /* Above node cards so animated packets and wires are vividly visible */
 }
 
 .topo-wire {
@@ -488,13 +488,15 @@ body {
 .packet-pulse {
   fill: #60a5fa;
   filter: url(#glow);
-  r: 5px;
+  r: 8px;
 }
 .packet-pulse.green {
-  fill: #34d399;
+  fill: #10b981;
+  filter: drop-shadow(0 0 10px #10b981);
 }
 .packet-pulse.red {
-  fill: #f87171;
+  fill: #ef4444;
+  filter: drop-shadow(0 0 10px #ef4444);
 }
 
 /* Контейнер DOM карточек узлов */
