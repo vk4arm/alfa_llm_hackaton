@@ -1,0 +1,30 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local logs and test files
+check_demo.py
+screenshot*.png
+test_*.html
+*.log

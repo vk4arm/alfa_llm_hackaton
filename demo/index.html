@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALFA AI GATEWAY — Интерактивный демонстрационный стенд LLM-прокси</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- ВЕРХНЯЯ ШАПКА / ТЕЛЕМЕТРИЯ СИСТЕМЫ -->
+    <header class="top-header">
+      <div class="header-left">
+        <div class="logo-group">
+          <div class="logo-badge">
+            <span class="logo-icon">⚡</span>
+          </div>
+          <div class="logo-text">
+            <h1 class="logo-title">ALFA AI GATEWAY</h1>
+            <span class="logo-subtitle">Enterprise LLM-Proxy & Resilience Control Plane</span>
+          </div>
+        </div>
+        <div class="env-badge">
+          <span class="pulse-dot green"></span>
+          <span>ON-PREMISE AIR-GAPPED</span>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <!-- СТАТУС CIRCUIT BREAKER -->
+        <div class="metric-pill cb-status-pill" id="cbGlobalPill">
+          <span class="pill-label">CIRCUIT BREAKER:</span>
+          <span class="status-indicator closed" id="cbGlobalText">CLOSED (NORMAL)</span>
+        </div>
+        <!-- СТАТУС GPU ПУЛА -->
+        <div class="metric-pill">
+          <span class="pill-label">GPU LOAD:</span>
+          <div class="mini-progress-bar">
+            <div class="mini-progress-fill" id="gpuGlobalFill" style="width: 38%;"></div>
+          </div>
+          <span class="pill-val" id="gpuGlobalVal">38%</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="quick-stats">
+          <div class="stat-item">
+            <span class="stat-num" id="statReqCount">1,420</span>
+            <span class="stat-lbl">RPS / Мин</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statP99">18 ms</span>
+            <span class="stat-lbl">P99 Прокси</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statCacheRatio">34.2%</span>
+            <span class="stat-lbl">Cache Hit</span>
+          </div>
+          <div class="stat-item highlight-red">
+            <span class="stat-num" id="statBlockedPii">284</span>
+            <span class="stat-lbl">ПДн скрыто</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- НАВИГАЦИОННАЯ ПАНЕЛЬ ТАБОВ -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="topology">
+        <span class="tab-icon">🗺️</span>
+        <span class="tab-title">Интерактивная топология</span>
+        <span class="tab-badge">Live Flow</span>
+      </button>
+      <button class="tab-btn" data-tab="simulator">
+        <span class="tab-icon">🧪</span>
+        <span class="tab-title">Песочница запросов</span>
+        <span class="tab-badge pulse">Сценарии</span>
+      </button>
+      <button class="tab-btn" data-tab="circuit-breaker">
+        <span class="tab-icon">🛑</span>
+        <span class="tab-title">Circuit Breaker & Отказоустойчивость</span>
+      </button>
+      <button class="tab-btn" data-tab="guardrails">
+        <span class="tab-icon">🛡️</span>
+        <span class="tab-title">Zero-PII Vault & Факт-чекинг</span>
+      </button>
+    </nav>
+
+    <!-- ОСНОВНОЕ СОДЕРЖИМОЕ -->
+    <main class="main-content">
+
+      <!-- ============================================== -->
+      <!-- ВКЛАДКА 1: ИНТЕРАКТИВНАЯ ТОПОЛОГИЯ           -->
+      <!-- ============================================== -->
+      <section class="tab-pane active" id="pane-topology">
+        <div class="topology-wrapper">
+          <div class="topology-toolbar">
+            <div class="toolbar-info">
+              <span class="toolbar-title">Сетевая топология банка и прохождение транзакции в реальном времени</span>
+              <span class="toolbar-desc">Кликните на любой узел для просмотра внутренних метрик и конфигурации</span>
+            </div>
+            <div class="toolbar-actions">
+              <button class="btn btn-sm btn-primary" id="btnTestFlow" onclick="window.runTopologyTest && window.runTopologyTest()">
+                <span>▶️ Запустить тестовый запрос</span>
+              </button>
+              <button class="btn btn-sm btn-danger" id="btnToggleOverload" onclick="window.toggleOverload && window.toggleOverload()">
+                <span>💥 Имитировать отказ Qwen-72B</span>
+              </button>
+              <button class="btn btn-sm btn-secondary" id="btnResetTopology" onclick="window.resetTopology && window.resetTopology()">
+                <span>🔄 Сброс</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="topology-stage">
+            <!-- SVG СВЯЗИ И АНИМИРОВАННЫЕ ПАКЕТЫ -->
+            <svg class="topology-svg" id="topologySvg" viewBox="0 0 1360 600">
+              <defs>
+                <linearGradient id="gradBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.8"/>
+                </linearGradient>
+                <linearGradient id="gradGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="#10b981" stop-opacity="0.8"/>
+                </linearGradient>
+                <linearGradient id="gradRed" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#ef4444" stop-opacity="0.2"/>
+                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0.8"/>
+                </linearGradient>
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+              </defs>
+
+              <!-- Связи от клиентов к Ingress -->
+              <path id="pathClientToIngress" d="M 210 115 C 235 115, 235 195, 260 195" class="topo-wire" />
+              <path id="pathClient2ToIngress" d="M 210 230 C 235 230, 235 195, 260 195" class="topo-wire" />
+              <path id="pathClient3ToIngress" d="M 210 345 C 235 345, 235 195, 260 195" class="topo-wire" />
+
+              <!-- Конвейер шлюза -->
+              <path id="pathIngressToVault" d="M 390 195 L 420 195" class="topo-wire" />
+              <path id="pathVaultToGuard" d="M 560 195 L 590 195" class="topo-wire" />
+              <path id="pathGuardToCache" d="M 730 195 L 760 195" class="topo-wire" />
+              <path id="pathCacheToRouter" d="M 900 195 L 930 195" class="topo-wire" />
+
+              <!-- Каскад к 3 моделям LLM (Красивый Fan-out) -->
+              <path id="pathRouterToTier1" d="M 1070 195 C 1090 195, 1090 95, 1110 95" class="topo-wire wire-tier1" />
+              <path id="pathRouterToTier2" d="M 1070 195 C 1090 195, 1090 215, 1110 215" class="topo-wire wire-tier2" />
+              <path id="pathRouterToTier3" d="M 1070 195 C 1090 195, 1090 335, 1110 335" class="topo-wire wire-tier3" />
+
+              <!-- Вертикальные связи с хранилищами и шиной SIEM -->
+              <path id="pathVaultToRedis" d="M 490 230 L 490 460" class="topo-wire wire-storage" />
+              <path id="pathGatewayToKafka" d="M 660 230 L 660 460" class="topo-wire wire-storage" />
+              <path id="pathCacheToVector" d="M 830 230 L 830 460" class="topo-wire wire-storage" />
+
+              <!-- Анимированные импульсы пакетов -->
+              <g id="packetLayer"></g>
+            </svg>
+
+            <!-- DOM УЗЛЫ ТОПОЛОГИИ С КАРТОЧКАМИ -->
+            <div class="topo-nodes-container">
+              
+              <!-- ЗОНА 1: КЛИЕНТЫ -->
+              <div class="topo-zone zone-clients">
+                <span class="zone-label" style="top: 25px; left: 40px;">ДМЗ / КЛИЕНТСКИЕ СИСТЕМЫ</span>
+                <div class="node-card" data-node="client-mobile" style="top: 75px; left: 40px; width: 170px;">
+                  <div class="node-icon">📱</div>
+                  <div class="node-body">
+                    <span class="node-name">Мобильный Банк</span>
+                    <span class="node-status text-green">VIP (P0) / Realtime</span>
+                  </div>
+                </div>
+                <div class="node-card" data-node="client-callcenter" style="top: 190px; left: 40px; width: 170px;">
+                  <div class="node-icon">🎧</div>
+                  <div class="node-body">
+                    <span class="node-name">АРМ Оператора</span>
+                    <span class="node-status text-blue">High (P0) / Суфлер</span>
+                  </div>
+                </div>
+                <div class="node-card" data-node="client-crm" style="top: 305px; left: 40px; width: 170px;">
+                  <div class="node-icon">🏢</div>
+                  <div class="node-body">
+                    <span class="node-name">CRM & Бэк-офис</span>
+                    <span class="node-status text-purple">Medium (P1)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ЗОНА 2: ПЕРИМЕТР ШЛЮЗА -->
+              <div class="topo-zone zone-gateway">
+                <span class="zone-label" style="top: 80px; left: 260px;">ПЕРИМЕТР БЕЗОПАСНОСТИ & ШЛЮЗ (ALFA AI GATEWAY CORE)</span>
+                
+                <div class="node-card" data-node="ingress" style="top: 160px; left: 260px; width: 130px;">
+                  <div class="node-icon">🛡️</div>
+                  <div class="node-body">
+                    <span class="node-name">API Ingress</span>
+                    <span class="node-status text-green">mTLS • Keycloak</span>
+                  </div>
+                </div>
+
+                <div class="node-card" data-node="vault" style="top: 160px; left: 420px; width: 140px;">
+                  <div class="node-icon">🔒</div>
+                  <div class="node-body">
+                    <span class="node-name">Zero-PII Vault</span>
+                    <span class="node-status text-amber">Luhn • Ru-NER</span>
+                  </div>
+                </div>
+
+                <div class="node-card" data-node="guardrails" style="top: 160px; left: 590px; width: 140px;">
+                  <div class="node-icon">⚔️</div>
+                  <div class="node-body">
+                    <span class="node-name">Ru-Guardrails</span>
+                    <span class="node-status text-cyan">Toxicity & Jailbreak</span>
+                  </div>
+                </div>
+
+                <div class="node-card" data-node="cache" style="top: 160px; left: 760px; width: 140px;">
+                  <div class="node-icon">⚡</div>
+                  <div class="node-body">
+                    <span class="node-name">Semantic Cache</span>
+                    <span class="node-status text-green">Cosine &gt; 0.95</span>
+                  </div>
+                </div>
+
+                <div class="node-card" data-node="router" style="top: 160px; left: 930px; width: 140px;">
+                  <div class="node-icon">🔀</div>
+                  <div class="node-body">
+                    <span class="node-name">Circuit Router</span>
+                    <span class="node-status text-blue" id="nodeRouterStatus">Healthy</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ЗОНА 3: ИНФРАСТРУКТУРА ХРАНЕНИЯ -->
+              <div class="topo-zone zone-infra">
+                <span class="zone-label" style="top: 420px; left: 420px;">ЭФЕМЕРНЫЕ ХРАНИЛИЩА & SIEM АУДИТ</span>
+                <div class="node-card small" data-node="redis" style="top: 460px; left: 420px; width: 140px;">
+                  <div class="node-icon">🗄️</div>
+                  <div class="node-body">
+                    <span class="node-name">Redis Vault Map</span>
+                    <span class="node-status">TTL: 300s</span>
+                  </div>
+                </div>
+                <div class="node-card small" data-node="kafka" style="top: 460px; left: 590px; width: 140px;">
+                  <div class="node-icon">📨</div>
+                  <div class="node-body">
+                    <span class="node-name">Kafka SIEM Audit</span>
+                    <span class="node-status">WORM Log</span>
+                  </div>
+                </div>
+                <div class="node-card small" data-node="vectordb" style="top: 460px; left: 760px; width: 140px;">
+                  <div class="node-icon">🔍</div>
+                  <div class="node-body">
+                    <span class="node-name">Vector DB</span>
+                    <span class="node-status">Qdrant / Milvus</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ЗОНА 4: ON-PREM GPU КЛАСТЕР (3 LLM МОДЕЛИ) -->
+              <div class="topo-zone zone-gpu">
+                <span class="zone-label" style="top: 20px; left: 1110px;">ON-PREM GPU КЛАСТЕР (vLLM / SGLang)</span>
+                
+                <!-- TIER 1: ОСНОВНАЯ МОДЕЛЬ 72B -->
+                <div class="node-card gpu-card" data-node="tier1" id="cardTier1" style="top: 55px; left: 1110px; width: 220px;">
+                  <div class="node-icon">👑</div>
+                  <div class="node-body" style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span class="node-name">Qwen-2.5-72B</span>
+                      <span class="tier-pill tier-primary">TIER-1</span>
+                    </div>
+                    <span class="node-status text-green" id="tier1StatusText">Online • 4x A100 / H100</span>
+                    <div class="node-mini-bar"><div class="fill" id="tier1LoadBar" style="width: 45%;"></div></div>
+                  </div>
+                </div>
+
+                <!-- TIER 2: РЕЗЕРВНАЯ МОДЕЛЬ 32B / 14B -->
+                <div class="node-card gpu-card" data-node="tier2" id="cardTier2" style="top: 175px; left: 1110px; width: 220px;">
+                  <div class="node-icon">⚡</div>
+                  <div class="node-body" style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span class="node-name">Qwen-2.5-32B</span>
+                      <span class="tier-pill tier-reserve">TIER-2</span>
+                    </div>
+                    <span class="node-status text-blue">Standby Fallback • 2x A100</span>
+                    <div class="node-mini-bar"><div class="fill" id="tier2LoadBar" style="width: 15%;"></div></div>
+                  </div>
+                </div>
+
+                <!-- TIER 3: ЭКСТРЕННАЯ КВАНТОВАННАЯ МОДЕЛЬ 14B/7B -->
+                <div class="node-card gpu-card" data-node="tier3" id="cardTier3" style="top: 295px; left: 1110px; width: 220px;">
+                  <div class="node-icon">🚨</div>
+                  <div class="node-body" style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span class="node-name">Qwen-2.5-14B/7B</span>
+                      <span class="tier-pill tier-emergency">TIER-3</span>
+                    </div>
+                    <span class="node-status text-cyan">Fast-AWQ • Low-Latency</span>
+                    <div class="node-mini-bar"><div class="fill" id="tier3LoadBar" style="width: 8%;"></div></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ПАНЕЛЬ ДЕТАЛЕЙ ВЫБРАННОГО УЗЛА -->
+          <div class="node-details-drawer" id="nodeDrawer">
+            <div class="drawer-header">
+              <div class="drawer-title-group">
+                <span class="drawer-icon" id="drawerIcon">🛡️</span>
+                <div>
+                  <h3 class="drawer-title" id="drawerTitle">Параметры компонента</h3>
+                  <span class="drawer-sub" id="drawerSub">Сетевой узел кластера</span>
+                </div>
+              </div>
+              <button class="btn-close" id="btnCloseDrawer">&times;</button>
+            </div>
+            <div class="drawer-content" id="drawerContent">
+              <!-- Заполняется динамически через JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- ВКЛАДКА 2: ПЕСОЧНИЦА ЗАПРОСОВ (SIMULATOR)     -->
+      <!-- ============================================== -->
+      <section class="tab-pane" id="pane-simulator">
+        <div class="simulator-grid">
+          
+          <!-- ЛЕВАЯ КОЛОНКА: ВВОД И ПРЕСЕТЫ -->
+          <div class="sim-panel sim-input-panel">
+            <div class="panel-header">
+              <div class="panel-header-left">
+                <span class="panel-icon">📝</span>
+                <span class="panel-title">Входящий запрос от сервиса банка</span>
+              </div>
+              <span class="badge badge-subtle">OpenAI /v1/chat/completions</span>
+            </div>
+
+            <!-- ПРЕСЕТЫ ГОТОВЫХ СЦЕНАРИЕВ ДЛЯ ХАКАТОНА -->
+            <div class="presets-container">
+              <span class="presets-label">Готовые демонстрационные сценарии для жюри:</span>
+              <div class="presets-buttons">
+                <button class="preset-btn" data-preset="pii">
+                  <span class="p-icon">💳</span>
+                  <div class="p-text">
+                    <span class="p-title">Тест 1: ПДн и Банковская тайна</span>
+                    <span class="p-desc">Карта (Luhn), паспорт РФ, ФИО в промпте</span>
+                  </div>
+                </button>
+                <button class="preset-btn" data-preset="cache">
+                  <span class="p-icon">⚡</span>
+                  <div class="p-text">
+                    <span class="p-title">Тест 2: Semantic Cache Hit</span>
+                    <span class="p-desc">Типовой FAQ-запрос (< 15 мс)</span>
+                  </div>
+                </button>
+                <button class="preset-btn" data-preset="jailbreak">
+                  <span class="p-icon">🛑</span>
+                  <div class="p-text">
+                    <span class="p-title">Тест 3: RuJailbreak & Токсичность</span>
+                    <span class="p-desc">Попытка обхода и инъекции промпта</span>
+                  </div>
+                </button>
+                <button class="preset-btn" data-preset="hallucination">
+                  <span class="p-icon">⚖️</span>
+                  <div class="p-text">
+                    <span class="p-title">Тест 4: Анти-галлюцинация (RAG)</span>
+                    <span class="p-desc">NLI факт-чекинг кредитной ставки</span>
+                  </div>
+                </button>
+                <button class="preset-btn" data-preset="overload">
+                  <span class="p-icon">💣</span>
+                  <div class="p-text">
+                    <span class="p-title">Тест 5: Перегрузка и Fallback</span>
+                    <span class="p-desc">Отказ 72B ➔ Каскадный фоллбэк на 14B</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- ФОРМА ПАРАМЕТРОВ ЗАПРОСА -->
+            <div class="sim-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Модель запроса (Target LLM Model):</label>
+                  <select class="form-control" id="simModel">
+                    <option value="qwen-72b" selected>Qwen-2.5-72B-Instruct (Tier-1 Primary GPU)</option>
+                    <option value="qwen-32b">Qwen-2.5-32B-Instruct (Tier-2 Fallback GPU)</option>
+                    <option value="qwen-14b">Qwen-2.5-14B/7B-AWQ (Tier-3 Emergency)</option>
+                    <option value="deepseek-r1">DeepSeek-R1-Distill-32B (Reasoning / CoT)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Приоритет (X-Bank-Priority):</label>
+                  <select class="form-control" id="simPriority">
+                    <option value="HIGH">HIGH (Мобильный банк, Чат клиента)</option>
+                    <option value="MEDIUM" selected>MEDIUM (Внутренние АС, CRM)</option>
+                    <option value="LOW">LOW (Пакетный оффлайн-скоринг)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Режим безопасности:</label>
+                  <select class="form-control" id="simGuardMode">
+                    <option value="STRICT" selected>STRICT (Полная фильтрация + NLI)</option>
+                    <option value="AUDIT_ONLY">AUDIT_ONLY (Только аудит)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>RAG Контекст регламента (для факт-чекинга):</label>
+                <textarea class="form-control code-text" id="simContext" rows="2" placeholder="Официальный документ банка..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Пользовательский промпт:</label>
+                <textarea class="form-control" id="simPrompt" rows="4" placeholder="Введите текст запроса..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary btn-lg" id="btnRunSim" onclick="window.runSimulator && window.runSimulator()">
+                  <span class="btn-icon">⚡</span>
+                  <span id="btnRunSimText">Отправить через ALFA Gateway</span>
+                </button>
+                <button class="btn btn-secondary" id="btnClearSim" onclick="window.clearSimulator && window.clearSimulator()">Очистить</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ПРАВАЯ КОЛОНКА: СКВОЗНАЯ ТЕЛЕМЕТРИЯ ОБРАБОТКИ -->
+          <div class="sim-panel sim-output-panel">
+            <div class="panel-header">
+              <div class="panel-header-left">
+                <span class="panel-icon">📊</span>
+                <span class="panel-title">Сквозной конвейер обработки и результат</span>
+              </div>
+              <span class="badge" id="simStatusBadge">ОЖИДАНИЕ</span>
+            </div>
+
+            <!-- ПОШАГОВЫЕ КАРТОЧКИ СТАДИЙ -->
+            <div class="pipeline-stepper" id="pipelineStepper">
+              <div class="step-card" id="step-auth">
+                <div class="step-badge">1</div>
+                <div class="step-info">
+                  <span class="step-name">Auth & Rate Limit</span>
+                  <span class="step-detail">Token Bucket: OK</span>
+                </div>
+                <span class="step-time">1.2 ms</span>
+              </div>
+
+              <div class="step-card" id="step-pii">
+                <div class="step-badge">2</div>
+                <div class="step-info">
+                  <span class="step-name">Zero-PII Vault</span>
+                  <span class="step-detail" id="stepPiiDetail">Ожидание...</span>
+                </div>
+                <span class="step-time" id="stepPiiTime">-</span>
+              </div>
+
+              <div class="step-card" id="step-guardin">
+                <div class="step-badge">3</div>
+                <div class="step-info">
+                  <span class="step-name">Ru-Guardrails (In)</span>
+                  <span class="step-detail" id="stepGuardInDetail">Ожидание...</span>
+                </div>
+                <span class="step-time" id="stepGuardInTime">-</span>
+              </div>
+
+              <div class="step-card" id="step-cache">
+                <div class="step-badge">4</div>
+                <div class="step-info">
+                  <span class="step-name">Semantic Cache</span>
+                  <span class="step-detail" id="stepCacheDetail">Ожидание...</span>
+                </div>
+                <span class="step-time" id="stepCacheTime">-</span>
+              </div>
+
+              <div class="step-card" id="step-llm">
+                <div class="step-badge">5</div>
+                <div class="step-info">
+                  <span class="step-name">vLLM Inference</span>
+                  <span class="step-detail" id="stepLlmDetail">Ожидание...</span>
+                </div>
+                <span class="step-time" id="stepLlmTime">-</span>
+              </div>
+
+              <div class="step-card" id="step-guardout">
+                <div class="step-badge">6</div>
+                <div class="step-info">
+                  <span class="step-name">NLI Fact Guard (Out)</span>
+                  <span class="step-detail" id="stepGuardOutDetail">Ожидание...</span>
+                </div>
+                <span class="step-time" id="stepGuardOutTime">-</span>
+              </div>
+
+              <div class="step-card" id="step-unmask">
+                <div class="step-badge">7</div>
+                <div class="step-info">
+                  <span class="step-name">De-anonymize & Delivery</span>
+                  <span class="step-detail" id="stepUnmaskDetail">Ожидание...</span>
+                </div>
+                <span class="step-time" id="stepUnmaskTime">-</span>
+              </div>
+            </div>
+
+            <!-- ИНСПЕКТОР СРАВНЕНИЯ (ЧТО УШЛО В МОДЕЛЬ VS ЧТО ПОЛУЧИЛ КЛИЕНТ) -->
+            <div class="diff-inspector">
+              <div class="diff-tabs">
+                <button class="diff-tab active" data-view="final">Финальный ответ клиенту</button>
+                <button class="diff-tab" data-view="sanitized">Что увидела модель (Обезличено)</button>
+                <button class="diff-tab" data-view="raw">Сырой ответ vLLM</button>
+                <button class="diff-tab" data-view="vault">Vault Session Map</button>
+              </div>
+              <div class="diff-body">
+                <div class="diff-view active" id="view-final">
+                  <div class="chat-bubble-response" id="outFinalText">
+                    Нажмите «Отправить через ALFA Gateway» для запуска симуляции...
+                  </div>
+                </div>
+                <div class="diff-view" id="view-sanitized">
+                  <pre class="code-box" id="outSanitizedText">// Промпт после маскирования ПДн</pre>
+                </div>
+                <div class="diff-view" id="view-raw">
+                  <pre class="code-box" id="outRawText">// Сырой ответ от модели Qwen</pre>
+                </div>
+                <div class="diff-view" id="view-vault">
+                  <pre class="code-box" id="outVaultText">// Эфемерные записи сопоставления в Redis</pre>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- ВКЛАДКА 3: CIRCUIT BREAKER & ОТКАЗОУСТОЙЧИВОСТЬ-->
+      <!-- ============================================== -->
+      <section class="tab-pane" id="pane-circuit-breaker">
+        <div class="cb-dashboard">
+          
+          <!-- ВЕРХНИЙ БЛОК: STATE MACHINE И ИНДИКАЦИЯ -->
+          <div class="cb-state-card">
+            <div class="cb-state-header">
+              <span class="panel-icon">⚙️</span>
+              <div>
+                <h3 class="panel-title">Машина состояний Circuit Breaker (Hystrix / Resilience Pattern)</h3>
+                <span class="panel-desc">Защита от OOM и лавинообразных очередей при перегрузке GPU-кластера</span>
+              </div>
+            </div>
+
+            <div class="state-nodes-row">
+              <div class="state-node active" id="stClosed">
+                <div class="st-indicator green"></div>
+                <div class="st-info">
+                  <span class="st-name">CLOSED</span>
+                  <span class="st-desc">Штатный режим: 100% трафика на Qwen-72B</span>
+                </div>
+              </div>
+              <div class="state-arrow">➔</div>
+              <div class="state-node" id="stOpen">
+                <div class="st-indicator red"></div>
+                <div class="st-info">
+                  <span class="st-name">OPEN</span>
+                  <span class="st-desc">Срабатывание защиты: фоллбэк на 32B/14B</span>
+                </div>
+              </div>
+              <div class="state-arrow">➔</div>
+              <div class="state-node" id="stHalfOpen">
+                <div class="st-indicator amber"></div>
+                <div class="st-info">
+                  <span class="st-name">HALF-OPEN</span>
+                  <span class="st-desc">Canary: 5% пробного трафика на 72B</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ИНТЕРАКТИВНОЕ УПРАВЛЕНИЕ ТРИГГЕРАМИ СБОЕВ -->
+            <div class="cb-triggers-panel">
+              <span class="cb-triggers-title">Ручные инъекции сбоев для демонстрации:</span>
+              <div class="cb-trigger-buttons">
+                <button class="btn btn-outline-danger" id="btnTripBreaker">
+                  <span>⚡ Спровоцировать исчерпание памяти KV-кэша (>95%)</span>
+                </button>
+                <button class="btn btn-outline-warning" id="btnSpikeLatency">
+                  <span>⏱️ Имитировать всплеск латентности (>5000 мс)</span>
+                </button>
+                <button class="btn btn-outline-success" id="btnHealCluster">
+                  <span>💚 Восстановить нормальную работу (Heal)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- СЕТКА МЕТРИК НАГРУЗКИ И ПУЛА МОДЕЛЕЙ -->
+          <div class="cb-metrics-grid">
+            
+            <div class="metric-card">
+              <div class="metric-card-header">
+                <span>P99 Latency (vLLM Tier-1)</span>
+                <span class="badge" id="badgeP99Status">NORMAL</span>
+              </div>
+              <div class="metric-value-huge" id="valLatencyP99">840 ms</div>
+              <div class="metric-chart-container">
+                <canvas id="chartLatency" height="80"></canvas>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-card-header">
+                <span>KV-Cache Saturation</span>
+                <span class="badge" id="badgeKvStatus">OK</span>
+              </div>
+              <div class="metric-value-huge" id="valKvSaturation">42.8%</div>
+              <div class="progress-bar-lg">
+                <div class="progress-fill-lg green" id="fillKvCache" style="width: 42.8%;"></div>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-card-header">
+                <span>Процент ошибок (5xx / Timeout)</span>
+                <span class="badge">Порог: 15%</span>
+              </div>
+              <div class="metric-value-huge" id="valErrorRate">0.4%</div>
+              <div class="progress-bar-lg">
+                <div class="progress-fill-lg green" id="fillErrorRate" style="width: 2%;"></div>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-card-header">
+                <span>Распределение трафика по пулам</span>
+                <span class="badge">Model Cascade</span>
+              </div>
+              <div class="cascade-bars">
+                <div class="cascade-item">
+                  <span class="c-label">Tier-1 (Qwen-72B):</span>
+                  <div class="c-bar"><div class="fill green" id="barTier1Share" style="width: 85%;"></div></div>
+                  <span class="c-val" id="valTier1Share">85%</span>
+                </div>
+                <div class="cascade-item">
+                  <span class="c-label">Tier-2 (Qwen-32B/14B):</span>
+                  <div class="c-bar"><div class="fill blue" id="barTier2Share" style="width: 10%;"></div></div>
+                  <span class="c-val" id="valTier2Share">10%</span>
+                </div>
+                <div class="cascade-item">
+                  <span class="c-label">Semantic Cache:</span>
+                  <div class="c-bar"><div class="fill purple" id="barCacheShare" style="width: 5%;"></div></div>
+                  <span class="c-val" id="valCacheShare">5%</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- ВКЛАДКА 4: GUARDRAILS & ZERO-PII VAULT        -->
+      <!-- ============================================== -->
+      <section class="tab-pane" id="pane-guardrails">
+        <div class="guardrails-grid">
+          
+          <!-- ЛЕВЫЙ БЛОК: ИНТЕРАКТИВНЫЙ ТЕСТЕР ТОКЕНИЗАЦИИ ПДН -->
+          <div class="guard-panel">
+            <div class="panel-header">
+              <div class="panel-header-left">
+                <span class="panel-icon">🔒</span>
+                <span class="panel-title">Zero-PII Vault (152-ФЗ & Банковская тайна)</span>
+              </div>
+              <span class="badge badge-subtle">Обратимая токенизация</span>
+            </div>
+            <p class="panel-intro">
+              Любые чувствительные данные клиентов маскируются до обращения к китайской модели и никогда не сохраняются в логах инференса.
+            </p>
+
+            <div class="form-group">
+              <label>Проверьте маскирование любого текста с ПДн:</label>
+              <textarea class="form-control" id="piiTestInput" rows="3">Переведите 120 000 руб с карты 5536 9141 2233 4455 на счет Сергеева Сергея Викторовича, паспорт 4512 778899, телефон +7 (916) 123-45-67.</textarea>
+            </div>
+
+            <div class="pii-results-box">
+              <div class="pii-sub-title">1. Распознанные сущности:</div>
+              <div class="pii-badges-list" id="piiDetectedBadges">
+                <!-- Вставляется через JS -->
+              </div>
+
+              <div class="pii-sub-title" style="margin-top: 14px;">2. Текст, который отправляется в модель:</div>
+              <div class="pii-sanitized-preview" id="piiSanitizedResult">
+                <!-- Вставляется через JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ПРАВЫЙ БЛОК: ИНТЕРАКТИВНЫЙ ФАКТ-ЧЕКЕР (NLI FAITHFULNESS) -->
+          <div class="guard-panel">
+            <div class="panel-header">
+              <div class="panel-header-left">
+                <span class="panel-icon">⚖️</span>
+                <span class="panel-title">NLI Детектор галлюцинаций (RAG Grounding)</span>
+              </div>
+              <span class="badge badge-subtle">Cross-Encoder mDeBERTa / RuBERT</span>
+            </div>
+            <p class="panel-intro">
+              Проверка математической и фактологической достоверности ответа модели относительно официального контекста регламента банка.
+            </p>
+
+            <div class="form-group">
+              <label>Официальный контекст (Источник истины):</label>
+              <textarea class="form-control code-text" id="nliContextInput" rows="2">По вкладу «Альфа-Премиум» базовая ставка составляет 19.2% годовых при сроке от 1 года. Минимальная сумма открытия — 500 000 рублей.</textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Ответ модели (сгенерированное утверждение):</label>
+              <textarea class="form-control code-text" id="nliClaimInput" rows="2">По вкладу «Альфа-Премиум» вы получите ставку 24.5% годовых при сумме от 100 000 рублей.</textarea>
+            </div>
+
+            <button class="btn btn-primary" id="btnRunNliCheck">
+              <span>⚖️ Проверить достоверность через NLI</span>
+            </button>
+
+            <div class="nli-verdict-card" id="nliVerdictCard" style="display: none;">
+              <div class="verdict-header">
+                <span class="verdict-badge" id="nliVerdictBadge">ГАЛЛЮЦИНАЦИЯ</span>
+                <span class="verdict-score" id="nliScoreText">Faithfulness: 0.12 (Contradiction)</span>
+              </div>
+              <div class="verdict-desc" id="nliVerdictDesc">
+                Обнаружено несоответствие процентной ставки (24.5% вместо 19.2%) и минимальной суммы. Шлюз подменит ответ безопасной заглушкой.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- НИЖНИЙ ТЕРМИНАЛ ЛОГОВ АУДИТА И СОБЫТИЙ -->
+    <footer class="bottom-terminal" id="bottomTerminal">
+      <div class="term-header">
+        <div class="term-header-left">
+          <span class="term-status-dot"></span>
+          <span class="term-title">KAFKA AUDIT & SIEM REALTIME EVENT LOG</span>
+          <span class="term-counter" id="logCounter">0 событий</span>
+        </div>
+        <div class="term-actions">
+          <button class="term-btn" id="btnClearLogs">Очистить лог</button>
+          <button class="term-btn" id="btnToggleTerm">Свернуть ▲</button>
+        </div>
+      </div>
+      <div class="term-body" id="terminalLogs">
+        <!-- Логи в реальном времени -->
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="app.js?v=3.2"></script>
+</body>
+</html>
