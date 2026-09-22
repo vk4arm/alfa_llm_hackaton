@@ -3,7 +3,7 @@ Zero-PII Vault: Natasha-powered Neural & Algorithmic Masker
 Compliant with Russian Federal Laws: 152-FZ (Personal Data) & 395-1 (Banking Secrecy).
 
 Supported entities:
-1.  ФИО (Full Name, declension & inflections handled via Slovnet/Natasha PER NER)
+1.  ФИО (Full Name, declension & inflections handled via Slovnet/Natasha PER NER with intent grounding)
 2.  Дата рождения (Birth Date)
 3.  Место рождения (Place of Birth)
 4.  Серия и номер паспорта РФ (Passport Series & Number)
@@ -24,7 +24,7 @@ Supported entities:
 
 import re
 import uuid
-from typing import Dict, Tuple, List, Optional, Any
+from typing import Dict, Tuple, List, Optional, Set
 from natasha import (
     Segmenter,
     MorphVocab,
@@ -64,14 +64,62 @@ def validate_inn(inn: str) -> bool:
         return checksum1 == digits[10] and checksum2 == digits[11]
     return False
 
+# Whitelist of renowned poets, writers, artists, scientists, and historical personalities
+FAMOUS_PERSONS: Set[str] = {
+    # Russian Classic Literature & Poetry
+    "пушкин", "пушкина", "пушкину", "пушкиным", "пушкине",
+    "есенин", "есенина", "есенину", "есениным", "есенине",
+    "лермонтов", "лермонтова", "лермонтову", "лермонтовым", "лермонтове",
+    "толстой", "толстого", "толстому", "толстым", "толстом",
+    "достоевский", "достоевского", "достоевскому", "достоевским", "достоевском",
+    "чехов", "чехова", "чехову", "чеховым", "чехове",
+    "маяковский", "маяковского", "маяковскому", "маяковским", "маяковском",
+    "блок", "блока", "блоку", "блоком", "блоке",
+    "ахматова", "ахматовой", "ахматову",
+    "цветаева", "цветаевой", "цветаеву",
+    "булгаков", "булгакова", "булгакову", "булгаковым", "булгакове",
+    "гоголь", "гоголя", "гоголю", "гоголем", "гоголе",
+    "тургенев", "тургенева", "тургеневу", "тургеневым", "тургеневе",
+    "пастернак", "пастернака", "пастернаку", "пастернаком", "пастернаке",
+    "бродский", "бродского", "бродскому", "бродским", "бродском",
+    "мандельштам", "мандельштама", "мандельштаму", "мандельштамом", "мандельштаме",
+    "некрасов", "некрасова", "некрасову", "некрасовым", "некрасове",
+    "тютчев", "тютчева", "тютчеву", "тютчевым", "тютчеве",
+    "фет", "фета", "фету", "фетом", "фете",
+    "крылов", "крылова", "крылову", "крыловым", "крылове",
+    "грибоедов", "грибоедова", "грибоедову", "грибоедовым", "грибоедове",
+    "куприн", "куприна", "куприну", "куприным", "куприне",
+    "бунин", "бунина", "бунину", "буниным", "бунине",
+    "набоков", "набокова", "набокову", "набоковым", "набокове",
+    "горький", "горького", "горькому", "горьким", "горьком",
+    "высоцкий", "высоцкого", "высоцкому", "высоцким", "высоцком",
+    "окуджава", "окуджавы", "окуджаве", "окуджаву",
+    "стругацкий", "стругацкие", "стругацких", "стругацким",
+    # Russian Science & Culture
+    "ломоносов", "ломоносова", "ломоносову", "ломоносовым", "ломоносове",
+    "менделеев", "менделеева", "менделееву", "менделеевым", "менделееве",
+    "чайковский", "чайковского", "чайковскому", "чайковским", "чайковском",
+    "рахманинов", "рахманинова", "рахманинову", "рахманиновым", "рахманинове",
+    "гагарин", "гагарина", "гагарину", "гагариным", "гагарине",
+    "королев", "королева", "королеву", "королевым", "королеве",
+    "циолковский", "циолковского", "циолковскому", "циолковским", "циолковском",
+    # World Heritage
+    "ньютон", "ньютона", "эйнштейн", "эйнштейна", "шекспир", "шекспира",
+    "байрон", "байрона", "гёте", "гете", "моцарт", "моцарта", "бах", "баха",
+    "бетховен", "бетховена", "сократ", "сократа", "платон", "платона",
+    "аристотель", "аристотеля", "леонардо", "дарвин", "дарвина", "тесла"
+}
+
 class NatashaPIIMasker:
     """
     High-speed, lightweight PII anonymizer and reversible tokenizer.
     Combines rule-based validators (Luhn, FNS checksums, RFC regexes) with
-    Natasha (Slovnet compact embeddings + Yargy grammars) for morphological NER.
+    Natasha (Slovnet compact embeddings + Yargy grammars) for morphological NER,
+    with intent-grounding and cultural figure exclusion.
     """
     def __init__(self, granular_address: bool = False):
         self.granular_address = granular_address
+        self.famous_persons = FAMOUS_PERSONS
         
         # Initialize lightweight NLP engines
         self.segmenter = Segmenter()
@@ -80,6 +128,21 @@ class NatashaPIIMasker:
         self.ner_tagger = NewsNERTagger(self.emb)
         self.addr_extractor = AddrExtractor(self.morph_vocab)
         
+        # Stylistic, comparative, and roleplay triggers (e.g. "Ты, как Пушкин", "в стиле Есенина")
+        self.metaphor_pattern = re.compile(
+            r'(?i)\b(?:ты,?\s+как|как|в\s+стиле|в\s+манере|в\s+духе|словами|стихи|поэзи[яие]|стихотворени[яе]|произведени[яе]|творчеств[ое]|биографи[яи]|автор[а-я]*|писател[а-я]*|поэт[а-я]*|кто\s+такой|книг[а-я]*|роман[а-я]*|повест[а-я]*|цитат[а-я]*)\s*$'
+        )
+
+        # Banking, transactional, and identity intent triggers anywhere in proximity
+        self.banking_intent_pattern = re.compile(
+            r'(?i)\b(?:клиент[а-я]*|заявител[а-я]*|заемщик[а-я]*|плательщик[а-я]*|получател[а-я]*|бенефициар[а-я]*|от\s+клиента|от\s+кого|фио|перевести|переведи|перевод[а-я]*|отправить|отправь|перечислить|скинуть|пополнить|списать|счет[а-я]*|на\s+имя|в\s+пользу|заблокировать|разблокировать|анкет[а-я]*|я,)\b'
+        )
+        
+        # Explicit customer identity regex pattern (strictly requiring capitalized Name words)
+        self.identity_person_pattern = re.compile(
+            r'(?:(?i:\b(?:клиент(?:у|а|ом)?|заявител(?:ю|я|ем)?|заемщик(?:у|а|ом)?|плательщик(?:у|а|ом)?|получател(?:ю|я|ем)?|бенефициар(?:у|а|ом)?|фио|заемщик|я,)\b)\s*[:\-–—]?\s*)([A-ZА-ЯЁ][a-zа-яё]+(?:\s+[A-ZА-ЯЁ][a-zа-яё]+){1,2})'
+        )
+
         # 1. Financial & Account Identifiers
         self.card_pattern = re.compile(r'\b(?:\d[ -]*?){13,19}\b')
         self.inn_pattern = re.compile(r'\b\d{10}\b|\b\d{12}\b')
@@ -127,6 +190,46 @@ class NatashaPIIMasker:
         self.address_line_pattern = re.compile(
             r'(?i)(?:\b(?:адрес(?:\s+постоянной|\s+фактической|\s+временной)?\s+(?:регистрации|проживания)|зарегистрирован\s+по\s+адресу|проживает\s+по\s+адресу)\b\s*[:\-–—]?\s*)(Россия[^\n]+|г\.[^\n]+|[0-9]{6},[^\n]+)'
         )
+
+    def is_person_pii(self, raw_name: str, full_text: str, start: int, end: int) -> bool:
+        """
+        Determines whether a detected person name is genuine personal data (PII)
+        tied to client identity or banking intents, or a cultural/stylistic reference.
+        """
+        # Clean trailing prepositions or particles if attached by NER
+        clean_name = re.sub(r'\s+\b(?:по|в|на|и|с|о|от|к|для|при|из|под|за)\b\s*$', '', raw_name.strip(" ,.:;!?()\"'"))
+        words = clean_name.split()
+        if not words:
+            return False
+
+        # Context window preceding the name
+        prefix = full_text[max(0, start - 50):start]
+
+        # 1. Metaphor, comparative, roleplay or literary context check:
+        # e.g., "Ты, как Александр Пушкин", "в стиле Льва Толстого", "стихи Сергея Есенина"
+        if self.metaphor_pattern.search(prefix):
+            return False
+
+        # 2. Check if name matches a famous cultural/historical personality
+        words_lower = [w.lower().strip(" ,.:;!?") for w in words]
+        is_famous = any(w in self.famous_persons for w in words_lower)
+
+        # Check if preceded by a banking/transaction intent or identity label
+        has_banking_intent = bool(self.banking_intent_pattern.search(prefix))
+
+        if is_famous:
+            # Famous personality is ONLY masked if explicitly bound to a banking/transaction intent:
+            # e.g. "Клиент: Пушкин Александр", "Перевести 5000 рублей Пушкину на карту..."
+            if has_banking_intent:
+                return True
+            return False
+
+        # 3. For ordinary names:
+        # Single capitalized word without banking intent is rejected to avoid false positives (e.g. "Позвони", "Тикет")
+        if len(words) < 2 and not has_banking_intent:
+            return False
+
+        return True
 
     def mask(self, text: str, session_id: Optional[str] = None) -> Tuple[str, str, Dict[str, str]]:
         """
@@ -228,7 +331,13 @@ class NatashaPIIMasker:
                 }.get(t_label, 'ADDRESS_PART')
                 add_span(m.start, m.stop, tag, text[m.start:m.stop])
 
-        # 17. Natasha NER for ФИО (PER)
+        # 17. Explicit customer identity pattern (Forms, applications, claims)
+        for m in self.identity_person_pattern.finditer(text):
+            val = m.group(1).strip()
+            if self.is_person_pii(val, text, m.start(1), m.end(1)):
+                add_span(m.start(1), m.end(1), 'FIO', val)
+
+        # 18. Natasha NER for ФИО (PER) with Intent & Cultural-figure filtering
         doc = Doc(text)
         doc.segment(self.segmenter)
         doc.tag_ner(self.ner_tagger)
@@ -241,8 +350,15 @@ class NatashaPIIMasker:
                 if raw_name.startswith('Я, '):
                     raw_name = raw_name[3:].strip()
                     st += 3
-                # Multi-word person name (e.g. Иванов Иван, Петров А. В.)
-                if len(raw_name.split()) >= 2:
+                
+                # Clean trailing preposition if attached by NER
+                cleaned_name = re.sub(r'\s+\b(?:по|в|на|и|с|о|от|к|для|при|из|под|за)\b\s*$', '', raw_name)
+                if len(cleaned_name) < len(raw_name):
+                    en = st + len(cleaned_name)
+                    raw_name = cleaned_name
+
+                # Apply intent-aware & cultural figure filtering
+                if self.is_person_pii(raw_name, text, st, en):
                     add_span(st, en, 'FIO', raw_name)
 
         # Sort spans by start position ascending
