@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alfa-ai-gateway
+  labels:
+    name: alfa-ai-gateway
+    bank.alfa/zone: internal-secure
+    bank.alfa/compliance: "152-fz-395-1"
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

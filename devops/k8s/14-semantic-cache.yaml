@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: semantic-cache
+  namespace: alfa-ai-gateway
+  labels:
+    app: semantic-cache
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: semantic-cache
+  template:
+    metadata:
+      labels:
+        app: semantic-cache
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+      - name: semantic-cache
+        image: registry.bank.alfa/ai/semantic-cache:v2.4.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8004
+          name: http
+        envFrom:
+        - configMapRef:
+            name: gateway-config
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2000m"
+            memory: "4Gi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: semantic-cache
+  namespace: alfa-ai-gateway
+  labels:
+    app: semantic-cache
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8004
+    targetPort: 8004
+    name: http
+  selector:
+    app: semantic-cache

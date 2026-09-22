@@ -1,0 +1,83 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: alfa-ai-gateway
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+
+---
+# Разрешает трафик между подами внутри namespace alfa-ai-gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-internal-mesh
+  namespace: alfa-ai-gateway
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector: {}
+  egress:
+  - to:
+    - podSelector: {}
+  # Разрешает обращения к CoreDNS кластера
+  - to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+# Разрешает входящий трафик от корпоративного WAF / Ingress банка на gateway-core
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-waf-to-gateway
+  namespace: alfa-ai-gateway
+spec:
+  podSelector:
+    matchLabels:
+      app: gateway-core
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          bank.alfa/zone: ingress-dmz
+    ports:
+    - protocol: TCP
+      port: 8000
+
+---
+# Разрешает доступ к изолированному On-Prem GPU кластеру vLLM (Air-Gap сегмент)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-onprem-vllm
+  namespace: alfa-ai-gateway
+spec:
+  podSelector:
+    matchLabels:
+      app: gateway-core
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.120.45.0/24 # Выделенная On-Prem сеть GPU серверов A100/H100
+    ports:
+    - protocol: TCP
+      port: 8000

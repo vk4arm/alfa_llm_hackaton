@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resilience-router
+  namespace: alfa-ai-gateway
+  labels:
+    app: resilience-router
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resilience-router
+  template:
+    metadata:
+      labels:
+        app: resilience-router
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+      - name: resilience-router
+        image: registry.bank.alfa/ai/resilience-router:v2.4.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8003
+          name: http
+        envFrom:
+        - configMapRef:
+            name: gateway-config
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resilience-router
+  namespace: alfa-ai-gateway
+  labels:
+    app: resilience-router
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8003
+    targetPort: 8003
+    name: http
+  selector:
+    app: resilience-router

@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nli-fact-guard
+  namespace: alfa-ai-gateway
+  labels:
+    app: nli-fact-guard
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nli-fact-guard
+  template:
+    metadata:
+      labels:
+        app: nli-fact-guard
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+      - name: nli-fact-guard
+        image: registry.bank.alfa/ai/nli-fact-guard:v2.4.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8005
+          name: http
+        resources:
+          requests:
+            cpu: "1000m"
+            memory: "2Gi"
+          limits:
+            cpu: "4000m"
+            memory: "6Gi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nli-fact-guard
+  namespace: alfa-ai-gateway
+  labels:
+    app: nli-fact-guard
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8005
+    targetPort: 8005
+    name: http
+  selector:
+    app: nli-fact-guard

@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: alfa-ai-gateway
+
+commonLabels:
+  app.kubernetes.io/part-of: alfa-ai-gateway
+  bank.alfa/system: llm-proxy
+
+resources:
+  - 00-namespace.yaml
+  - 01-config-secrets.yaml
+  - 02-network-policies.yaml
+  - 10-gateway-core.yaml
+  - 11-zero-pii-vault.yaml
+  - 12-ru-guardrails.yaml
+  - 13-resilience-router.yaml
+  - 14-semantic-cache.yaml
+  - 15-nli-fact-guard.yaml
+  - 16-audit-worm-logger.yaml
+  - 20-infrastructure.yaml

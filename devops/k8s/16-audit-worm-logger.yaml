@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-worm-logger
+  namespace: alfa-ai-gateway
+  labels:
+    app: audit-worm-logger
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: audit-worm-logger
+  template:
+    metadata:
+      labels:
+        app: audit-worm-logger
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+      - name: audit-worm-logger
+        image: registry.bank.alfa/ai/audit-worm-logger:v2.4.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8006
+          name: http
+        envFrom:
+        - configMapRef:
+            name: gateway-config
+        - secretRef:
+            name: gateway-secrets
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audit-worm-logger
+  namespace: alfa-ai-gateway
+  labels:
+    app: audit-worm-logger
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8006
+    targetPort: 8006
+    name: http
+  selector:
+    app: audit-worm-logger

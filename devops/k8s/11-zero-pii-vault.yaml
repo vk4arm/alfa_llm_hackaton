@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zero-pii-vault
+  namespace: alfa-ai-gateway
+  labels:
+    app: zero-pii-vault
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: zero-pii-vault
+  template:
+    metadata:
+      labels:
+        app: zero-pii-vault
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+      - name: zero-pii-vault
+        image: registry.bank.alfa/ai/zero-pii-vault:v2.4.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+          name: http
+        envFrom:
+        - configMapRef:
+            name: gateway-config
+        - secretRef:
+            name: gateway-secrets
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "2000m"
+            memory: "2Gi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zero-pii-vault
+  namespace: alfa-ai-gateway
+  labels:
+    app: zero-pii-vault
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8001
+    targetPort: 8001
+    name: http
+  selector:
+    app: zero-pii-vault

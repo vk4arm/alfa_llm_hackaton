@@ -20,3 +20,14 @@
 ## 📦 Архитектура сети (`alfa-mesh`)
 
 Все сервисы изолированы во внутренней Docker-сети `alfa-mesh`. Внешний доступ имеет только `gateway-core` через WAF/Ingress банка.
+
+---
+
+## ☸️ Развертывание в Kubernetes (`devops/k8s/`)
+
+В папке `devops/k8s/` подготовлен полный комплект production-манифестов для банковского Kubernetes-кластера (Kustomize):
+- Изоляция сетевого периметра (Air-Gap NetworkPolicies).
+- Соответствие Pod Security Standards (`restricted`).
+- Автомасштабирование HorizontalPodAutoscaler (3–20 реплик).
+- Подробнее: **[devops/k8s/README.md](k8s/README.md)**.
+
