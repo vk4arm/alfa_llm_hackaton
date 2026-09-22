@@ -379,7 +379,37 @@ body {
 
 .toolbar-actions {
   display: flex;
+  align-items: center;
   gap: 10px;
+}
+
+.badge-flow-status {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(15, 23, 42, 0.6);
+  transition: all 0.3s ease;
+}
+.badge-flow-status.normal {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+}
+.badge-flow-status.alert {
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.2);
+  animation: pulseBadge 1.2s infinite alternate;
+}
+@keyframes pulseBadge {
+  from { box-shadow: 0 0 5px rgba(239, 68, 68, 0.3); }
+  to { box-shadow: 0 0 15px rgba(239, 68, 68, 0.7); }
 }
 
 .btn {

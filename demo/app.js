@@ -391,7 +391,15 @@ function initAlfaApp() {
   const tier1LoadBar = document.getElementById('tier1LoadBar');
   const nodeRouterStatus = document.getElementById('nodeRouterStatus');
 
-  function handleToggleOverload() {
+  let lastToggleTime = 0;
+  function handleToggleOverload(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const now = Date.now();
+    if (now - lastToggleTime < 600) {
+      return;
+    }
+    lastToggleTime = now;
+
     state.isOverloaded = !state.isOverloaded;
     if (state.isOverloaded) {
       tripCircuitBreaker();
@@ -853,6 +861,11 @@ function initAlfaApp() {
         btnToggleOverload.innerHTML = '<span>💚 Восстановить Qwen-72B</span>';
         btnToggleOverload.className = 'btn btn-sm btn-outline-success';
       }
+      const topoFlowBadge = document.getElementById('topoFlowBadge');
+      if (topoFlowBadge) {
+        topoFlowBadge.innerHTML = '🔴 <strong>ОТКАЗ QWEN-72B</strong> • Трафик ➔ Tier-2 (Qwen-32B)';
+        topoFlowBadge.className = 'badge-flow-status alert';
+      }
     } else {
       cbGlobalText.textContent = 'CLOSED (NORMAL)';
       cbGlobalText.className = 'status-indicator closed';
@@ -880,6 +893,11 @@ function initAlfaApp() {
       if (btnToggleOverload) {
         btnToggleOverload.innerHTML = '<span>💥 Имитировать отказ Qwen-72B</span>';
         btnToggleOverload.className = 'btn btn-sm btn-danger';
+      }
+      const topoFlowBadge = document.getElementById('topoFlowBadge');
+      if (topoFlowBadge) {
+        topoFlowBadge.innerHTML = '🟢 <strong>ШТАТНЫЙ РЕЖИМ</strong> • 100% ➔ Qwen-72B';
+        topoFlowBadge.className = 'badge-flow-status normal';
       }
     }
 
