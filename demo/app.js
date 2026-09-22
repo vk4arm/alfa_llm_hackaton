@@ -228,10 +228,10 @@ function initAlfaApp() {
       details: `<p>Хранит маппинг <code>[CARD_1] ➔ 4276...</code> с жестким TTL в 300 секунд. Данные никогда не сбрасываются на постоянный диск.</p>`
     },
     'kafka': {
-      title: 'Kafka Immutable Audit SIEM',
-      sub: 'Шина событий информационной безопасности',
-      icon: '📨',
-      details: `<p>Все события маскирования, блокировок атак и срабатывания фоллбэков пишутся в WORM-топик (Write Once Read Many) для аудита ИБ банка.</p>`
+      title: 'Kaspersky KUMA SIEM & WORM Audit',
+      sub: 'Централизованная SIEM-система банка (CEF формат)',
+      icon: '🛡️',
+      details: `<p>Все события маскирования ПДн (152-ФЗ), отражения Jailbreak, галлюцинаций NLI и срабатывания Circuit Breaker транслируются в <strong>Kaspersky KUMA SIEM</strong> по стандарту CEF (Common Event Format) через WORM-шину (Write Once Read Many).</p>`
     },
     'vectordb': {
       title: 'Vector DB (Qdrant / Milvus)',

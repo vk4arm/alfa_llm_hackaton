@@ -81,7 +81,7 @@ flowchart TB
         direction TB
         RedisVault[("🗄️ Redis Cluster<br/>• Session PII Map (TTL=300s)<br/>• Quotas & Token Bucket")]
         VectorCache[("🔍 Vector DB (Qdrant / Milvus)<br/>• Semantic Cache Embeddings<br/>• RuJailbreak Vectors")]
-        KafkaAudit[("📨 Apache Kafka<br/>• Immutable Audit Trail<br/>• SIEM / Security Events")]
+        KafkaAudit[("🛡️ Kaspersky KUMA SIEM & Kafka<br/>• CEF Format & Correlation<br/>• Immutable WORM Audit")]
     end
 
     subgraph ONPREM_GPU[" 🚀 ИЗОЛИРОВАННЫЙ ON-PREM GPU-КЛАСТЕР (vLLM / SGLang) "]
@@ -237,7 +237,7 @@ sequenceDiagram
     end
 
     GW-->>-App: 200 OK (Stream SSE / JSON Response)
-    Note over GW: Асинхронный сброс метрик в Prometheus и аудит-лога в Kafka/SIEM
+    Note over GW: Асинхронный сброс метрик в Prometheus и CEF-событий в Kaspersky KUMA SIEM
 ```
 
 ---
@@ -538,4 +538,25 @@ flowchart LR
   * `mDeBERTa-v3-base-xnli` (ONNX Runtime, NLI-верификация фактов).
   * Библиотека `natasha` + Сборка оптимизированных регулярных выражений (карты, паспорта, телефоны).
 * **Инференс моделей:** vLLM / SGLang в Kubernetes (интеграция по стандартному протоколу vLLM OpenAI API).
-* **Наблюдаемость и аудит:** Prometheus (метрики RPS, TTFT, квоты) + Grafana + Kafka (неизменяемый лог аудита ИБ).
+* **Наблюдаемость и SIEM:** Prometheus (метрики RPS, TTFT, квоты) + Grafana + **Kaspersky KUMA SIEM** (неизменяемый WORM-аудит ИБ в формате CEF, Kafka topic `alfa.kuma.ai-gateway.events`).
+* **Экосистема защиты контейнеров и хостов:** **Kaspersky Container Security (KCS)** (сканирование CVE образов и рантайм-защита подов Kubernetes) + **Kaspersky Security for Storage (KSS)** (проверка RAG-документов до векторизации) + **Kaspersky Anti Targeted Attack (KATA) / EDR Expert** (защита закрытого сегмента GPU-инференса).
+
+---
+
+## 10. Модель угроз и средства защиты «Лаборатории Касперского»
+
+Полная спецификация модели угроз и архитектуры интеграции с экосистемой «Лаборатории Касперского» представлена в отдельном документе:
+👉 **[Модель угроз безопасности и интеграция с экосистемой «Лаборатории Касперского»](file:///Users/victor/work/СТРАННОЕ/alfa/docs/THREAT_MODEL_AND_KASPERSKY_INTEGRATION.md)**
+
+### Краткая сводка эшелонированной защиты:
+1. **Kaspersky Unified Monitoring and Analysis Platform (KUMA SIEM):**
+   * Прием событий аудита шлюза по стандарту CEF (Common Event Format) через mTLS Syslog или Kafka.
+   * Реализация 4 специализированных правил корреляции: `ALFA_AI_001_JAILBREAK_BURST`, `ALFA_AI_002_MASS_DEANONYMIZATION`, `ALFA_AI_003_CIRCUIT_BREAKER_TRIPPED`, `ALFA_AI_004_SYSTEMATIC_HALLUCINATIONS`.
+2. **Kaspersky Container Security (KCS):**
+   * Предотвращение уязвимостей в цепочке поставок (Supply Chain): сканирование базовых образов Python 3.11 и бинарных зависимостей vLLM на известные CVE.
+   * Контроль рантайма подов (`readOnlyRootFilesystem`), блокировка запуска несанкционированных процессов и попыток Container Escape.
+3. **Kaspersky Security for Storage (KSS):**
+   * Потоковая антивирусная и эвристическая проверка клиентских файлов и банковских выписок (PDF, DOCX) **до** их парсинга и занесения чанков в векторную базу Qdrant (защита от RAG Poisoning).
+4. **Kaspersky Anti Targeted Attack (KATA) & EDR Expert:**
+   * Глубокий анализ L7-трафика между шлюзом и кластером инференса vLLM; защита пространства ядра и CUDA-драйверов на физических нодах с NVIDIA A100.
+

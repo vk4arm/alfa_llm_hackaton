@@ -240,7 +240,7 @@
 
               <!-- ЗОНА 3: ИНФРАСТРУКТУРА ХРАНЕНИЯ -->
               <div class="topo-zone zone-infra">
-                <span class="zone-label" style="top: 420px; left: 420px;">ЭФЕМЕРНЫЕ ХРАНИЛИЩА & SIEM АУДИТ</span>
+                <span class="zone-label" style="top: 420px; left: 420px;">ЭФЕМЕРНЫЕ ХРАНИЛИЩА &amp; KASPERSKY SIEM</span>
                 <div class="node-card small" data-node="redis" style="top: 460px; left: 420px; width: 140px;">
                   <div class="node-icon">🗄️</div>
                   <div class="node-body">
@@ -248,11 +248,11 @@
                     <span class="node-status">TTL: 300s</span>
                   </div>
                 </div>
-                <div class="node-card small" data-node="kafka" style="top: 460px; left: 590px; width: 140px;">
-                  <div class="node-icon">📨</div>
+                <div class="node-card small" data-node="kafka" style="top: 460px; left: 590px; width: 155px;">
+                  <div class="node-icon">🛡️</div>
                   <div class="node-body">
-                    <span class="node-name">Kafka SIEM Audit</span>
-                    <span class="node-status">WORM Log</span>
+                    <span class="node-name">Kaspersky KUMA</span>
+                    <span class="node-status">CEF WORM Log</span>
                   </div>
                 </div>
                 <div class="node-card small" data-node="vectordb" style="top: 460px; left: 760px; width: 140px;">
@@ -753,7 +753,7 @@
       <div class="term-header">
         <div class="term-header-left">
           <span class="term-status-dot"></span>
-          <span class="term-title">KAFKA AUDIT & SIEM REALTIME EVENT LOG</span>
+          <span class="term-title">KASPERSKY KUMA SIEM &amp; AUDIT REALTIME EVENT LOG</span>
           <span class="term-counter" id="logCounter">0 событий</span>
         </div>
         <div class="term-actions">
@@ -999,10 +999,10 @@ function initAlfaApp() {
       details: `<p>Хранит маппинг <code>[CARD_1] ➔ 4276...</code> с жестким TTL в 300 секунд. Данные никогда не сбрасываются на постоянный диск.</p>`
     },
     'kafka': {
-      title: 'Kafka Immutable Audit SIEM',
-      sub: 'Шина событий информационной безопасности',
-      icon: '📨',
-      details: `<p>Все события маскирования, блокировок атак и срабатывания фоллбэков пишутся в WORM-топик (Write Once Read Many) для аудита ИБ банка.</p>`
+      title: 'Kaspersky KUMA SIEM & WORM Audit',
+      sub: 'Централизованная SIEM-система банка (CEF формат)',
+      icon: '🛡️',
+      details: `<p>Все события маскирования ПДн (152-ФЗ), отражения Jailbreak, галлюцинаций NLI и срабатывания Circuit Breaker транслируются в <strong>Kaspersky KUMA SIEM</strong> по стандарту CEF (Common Event Format) через WORM-шину (Write Once Read Many).</p>`
     },
     'vectordb': {
       title: 'Vector DB (Qdrant / Milvus)',

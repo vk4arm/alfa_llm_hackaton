@@ -155,14 +155,14 @@ function initPortal() {
       desc: 'Оценивает логическое следование (Entailment vs Contradiction) между ответом модели и официальным RAG-регламентом банка.'
     },
     'kafka-siem': {
-      title: 'Apache Kafka SIEM WORM Trail',
-      sub: 'Шина неизменяемого аудита ИБ',
-      icon: '📨',
-      sla: 'P99 < 5 мс (Async Write)',
-      tax: '0 мс (Фоновый сброс)',
-      hw: 'Kafka Cluster 3x брокера',
-      sec: 'WORM (Write Once Read Many), аудит инцидентов ИБ 24/7',
-      desc: 'Фиксирует каждое событие маскирования, блокировки атак, фактчекинга и переключения Circuit Breaker для расследований безопасности.'
+      title: 'Kaspersky KUMA SIEM & WORM Trail',
+      sub: 'Централизованный сбор и корреляция событий ИБ (CEF)',
+      icon: '🛡️',
+      sla: 'P99 < 5 мс (Async Write) | 100 000+ EPS',
+      tax: '0 мс (Фоновый сброс по Syslog TLS / Kafka)',
+      hw: 'Kaspersky KUMA Collector + Kafka Bus',
+      sec: 'WORM (Write Once Read Many), ГОСТ Р 57580.1, 152-ФЗ, 683-П',
+      desc: 'Kaspersky Unified Monitoring and Analysis Platform (KUMA) агрегирует CEF-события шлюза (блокировки джейлбрейков, маскирование ПДн, галлюцинации NLI, переход Circuit Breaker) и запускает автоматические плейбуки реагирования SOC.'
     }
   };
 
@@ -462,9 +462,9 @@ function initPortal() {
           </g>
 
           <g class="node-group" onclick="inspectNode('kafka-siem')">
-            <rect x="850" y="440" width="160" height="65" class="node-box red"/>
-            <text x="870" y="468" class="node-text-title">📨 Kafka SIEM WORM</text>
-            <text x="870" y="488" class="node-text-sub">Аудит безопасности 24/7</text>
+            <rect x="850" y="440" width="180" height="65" class="node-box red"/>
+            <text x="865" y="468" class="node-text-title">🛡️ Kaspersky KUMA SIEM</text>
+            <text x="865" y="488" class="node-text-sub">CEF WORM Trail &amp; SOC</text>
           </g>
         </svg>
       `;
@@ -827,6 +827,20 @@ function initPortal() {
               <td>12.4 мс</td>
               <td>ONNX Cross-Encoder</td>
               <td>mDeBERTa-v3-base-xnli (Faithfulness > 0.85)</td>
+            </tr>
+            <tr>
+              <td><strong>Kaspersky KUMA SIEM</strong></td>
+              <td>Централизованный аудит и корреляция</td>
+              <td>0 мс (Async Syslog TLS)</td>
+              <td>KUMA Collector + Kafka</td>
+              <td>Формат CEF, ГОСТ Р 57580.1, правила ALFA_AI_001..004</td>
+            </tr>
+            <tr>
+              <td><strong>Kaspersky Container Security (KCS)</strong></td>
+              <td>CI/CD аудит CVE и рантайм-контроль подов</td>
+              <td>Превентивно (CI/CD + Kernel)</td>
+              <td>KCS Sensor Node DaemonSet</td>
+              <td>CIS K8s Benchmark, readOnlyRootFilesystem, Anti-Escape</td>
             </tr>
           </tbody>
         </table>

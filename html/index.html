@@ -24,6 +24,7 @@
 
       <nav class="header-nav">
         <a href="#schematics" class="nav-link">Архитектурные схемы</a>
+        <a href="#threat-model" class="nav-link" style="color: #6ee7b7;">Модель угроз &amp; Касперский</a>
         <a href="#calculator" class="nav-link">GPU Калькулятор</a>
         <a href="#matrix" class="nav-link">Сравнение решений</a>
         <a href="../demo/index.html" class="nav-link" style="color: #fca5a5;">Интерактивное Демо ↗</a>
@@ -334,7 +335,127 @@
   </section>
 
   <!-- =========================================================================
-       5. COMPETITIVE COMPARISON MATRIX
+       5. THREAT MODEL & KASPERSKY LAB ECOSYSTEM
+       ========================================================================= -->
+  <section class="threat-section" id="threat-model">
+    <div class="container">
+      <div class="section-title-wrap">
+        <span class="section-tag" style="background: rgba(16, 185, 129, 0.12); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">
+          🛡️ Эшелонированная безопасность ИИ
+        </span>
+        <h2 class="section-title">Модель угроз и средства защиты «Лаборатории Касперского»</h2>
+        <p class="section-desc">
+          Комплексная нейтрализация рисков OWASP Top 10 for LLM Applications (2025), соблюдение требований ФСТЭК России, положений Банка России 683-П / 716-П / 757-П, стандарта ГОСТ Р 57580.1 и защита банковской тайны (395-1, 152-ФЗ).
+        </p>
+      </div>
+
+      <!-- Сетка решений Лаборатории Касперского -->
+      <div class="kaspersky-grid">
+        <!-- Карточка 1: KUMA SIEM -->
+        <div class="kaspersky-card">
+          <div class="kaspersky-header">
+            <div class="kaspersky-icon">🛡️</div>
+            <div>
+              <div class="kaspersky-title">Kaspersky KUMA (SIEM)</div>
+              <div class="kaspersky-sub">Централизованный сбор и корреляция событий</div>
+            </div>
+          </div>
+          <p class="kaspersky-body">
+            Сбор неизменяемого WORM-аудита в формате CEF (Common Event Format) по Syslog TLS или Kafka. Корреляционные правила KUMA детектируют: взрывные серии джейлбрейков (<code>ALFA_AI_001</code>), аномальный дамп ПДн (<code>ALFA_AI_002</code>), аварийное размыкание Circuit Breaker (<code>ALFA_AI_003</code>) и искажение условий договоров (<code>ALFA_AI_004</code>).
+          </p>
+          <div class="kaspersky-tags">
+            <span class="kaspersky-tag">CEF Format</span>
+            <span class="kaspersky-tag">TLS Syslog 6514</span>
+            <span class="kaspersky-tag">Kafka WORM</span>
+            <span class="kaspersky-tag">SOC Playbooks</span>
+            <span class="kaspersky-tag">ГОСТ Р 57580.1</span>
+          </div>
+        </div>
+
+        <!-- Карточка 2: KCS -->
+        <div class="kaspersky-card">
+          <div class="kaspersky-header">
+            <div class="kaspersky-icon">📦</div>
+            <div>
+              <div class="kaspersky-title">Kaspersky Container Security (KCS)</div>
+              <div class="kaspersky-sub">Защита жизненного цикла Kubernetes</div>
+            </div>
+          </div>
+          <p class="kaspersky-body">
+            CI/CD сканирование образов Python 3.11 и vLLM на известные CVE до деплоя. KCS Runtime Sensor контролирует целостность рантайма, блокирует несанкционированные процессы, форсирует <code>readOnlyRootFilesystem</code> и защищает от выхода из контейнера (Container Escape) на GPU-ноды.
+          </p>
+          <div class="kaspersky-tags">
+            <span class="kaspersky-tag">CVE Pre-scan</span>
+            <span class="kaspersky-tag">Runtime Sensor</span>
+            <span class="kaspersky-tag">Anti-Escape</span>
+            <span class="kaspersky-tag">readOnlyRootFS</span>
+          </div>
+        </div>
+
+        <!-- Карточка 3: KSS -->
+        <div class="kaspersky-card">
+          <div class="kaspersky-header">
+            <div class="kaspersky-icon">📂</div>
+            <div>
+              <div class="kaspersky-title">Kaspersky Security for Storage (KSS)</div>
+              <div class="kaspersky-sub">Защита контура RAG от отравления данных</div>
+            </div>
+          </div>
+          <p class="kaspersky-body">
+            Потоковая антивирусная и эвристическая проверка клиентских кредитных досье, выписок и регламентов (PDF, DOCX) <strong>до</strong> парсинга и занесения чанков в векторную базу Qdrant. Предотвращает эксплойты в библиотеках парсинга и атаки типа RAG Poisoning.
+          </p>
+          <div class="kaspersky-tags">
+            <span class="kaspersky-tag">RAG Poisoning Shield</span>
+            <span class="kaspersky-tag">PDF/DOCX Stream Scan</span>
+            <span class="kaspersky-tag">Anti-Exploit</span>
+          </div>
+        </div>
+
+        <!-- Карточка 4: KATA / EDR Expert -->
+        <div class="kaspersky-card">
+          <div class="kaspersky-header">
+            <div class="kaspersky-icon">🎯</div>
+            <div>
+              <div class="kaspersky-title">Kaspersky KATA &amp; EDR Expert</div>
+              <div class="kaspersky-sub">Защита изолированного GPU-контура от APT</div>
+            </div>
+          </div>
+          <p class="kaspersky-body">
+            Сетевые сенсоры KATA анализируют L7-трафик между шлюзом и инференс-пулом vLLM. Хостовые EDR-агенты на физических серверах с NVIDIA A100 контролируют пространство ядра Linux, защищая видеодрайверы и библиотеки CUDA от несанкционированных инъекций памяти.
+          </p>
+          <div class="kaspersky-tags">
+            <span class="kaspersky-tag">APT Detection</span>
+            <span class="kaspersky-tag">Host EDR</span>
+            <span class="kaspersky-tag">NVIDIA CUDA Shield</span>
+            <span class="kaspersky-tag">L7 Inspection</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Интерактивный предпросмотр CEF-событий KUMA -->
+      <div class="cef-box">
+        <div class="cef-title">
+          <span>📡 ПРИМЕРЫ CEF-СООБЩЕНИЙ ДЛЯ KASPERSKY KUMA SIEM (PORT 6514 / KAFKA)</span>
+          <span class="badge badge-green" style="font-size: 10px;">Syslog TLS • ArcSight Standard</span>
+        </div>
+        <div><span style="color: #f87171;">[HIGH/8]</span> CEF:0|AlfaBank|AlfaAIGateway|2.4.0|SEC-001|PromptInjectionBlocked|8|src=10.14.22.81 suser=mobile-banking msg=Detected DAN jailbreak attempt cs1Label=Model cs1=qwen-2.5-72b cs2Label=Rule cs2=ru_jailbreak_cosine</div>
+        <div style="margin-top: 6px;"><span style="color: #60a5fa;">[INFO/2]</span> CEF:0|AlfaBank|AlfaAIGateway|2.4.0|DLP-001|BankingSecrecyMasked|2|src=10.14.50.12 suser=crm-operator msg=Masked 1 credit card (Luhn valid) and 1 Russian passport cs2Label=SessionID cs2=550e8400-e29b-41d4-a716-446655440000</div>
+        <div style="margin-top: 6px;"><span style="color: #fbbf24;">[WARN/5]</span> CEF:0|AlfaBank|AlfaAIGateway|2.4.0|NLI-001|HallucinationBlocked|5|src=10.14.22.81 suser=retail-faq msg=Faithfulness score 0.14 below threshold 0.75. Rate contradiction: 24.5% vs 19.2% cs1Label=Model cs1=qwen-2.5-72b</div>
+      </div>
+
+      <div style="margin-top: 24px; display: flex; gap: 16px; flex-wrap: wrap;">
+        <a href="../docs/THREAT_MODEL_AND_KASPERSKY_INTEGRATION.md" class="btn btn-primary" style="padding: 10px 20px; font-size: 13px;">
+          <span>📑 Открыть полную Модель угроз (Markdown) ↗</span>
+        </a>
+        <a href="../demo/index.html" class="btn btn-secondary" style="padding: 10px 20px; font-size: 13px;">
+          <span>🎮 Проверить события в симуляторе ↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       6. COMPETITIVE COMPARISON MATRIX
        ========================================================================= -->
   <section class="matrix-section" id="matrix">
     <div class="container">
@@ -453,6 +574,7 @@
 
       <div class="footer-links">
         <a href="#schematics" class="footer-link">Схемы</a>
+        <a href="#threat-model" class="footer-link" style="color: #6ee7b7;">Модель угроз ИБ</a>
         <a href="#calculator" class="footer-link">GPU Сайзинг</a>
         <a href="#matrix" class="footer-link">Бенчмарк</a>
         <a href="../demo/index.html" class="footer-link" style="color: #f87171;">Интерактивное Демо ↗</a>

@@ -79,6 +79,15 @@
 * Банковские сценарии (Суфлер контакт-центра, RAG по кредитным регламентам, B2B андеррайтинг, Code Copilot).
 * Сценарий победной 3-минутной live-демонстрации жюри на хакатоне.
 
+### 3. 🛡️ [Модель угроз и интеграция с «Лабораторией Касперского» (docs/THREAT_MODEL_AND_KASPERSKY_INTEGRATION.md)](docs/THREAT_MODEL_AND_KASPERSKY_INTEGRATION.md)
+**Модель угроз по OWASP Top 10 for LLM (2025) и эшелонированная защита:**
+* **Модель нарушителя** (Внешний Н1, внутренний Н2, целевая APT-группировка Н3).
+* **Матрица угроз ИИ** (TH-01 Jailbreak, TH-02 Sensitive Data Leakage, TH-03 RAG Poisoning, TH-04 Hallucination, TH-05 GPU DoS, TH-06 Supply Chain, TH-07 System Prompt Leakage, TH-08 Lateral Movement).
+* **Kaspersky KUMA (SIEM):** Сбор WORM-аудита в формате CEF по Syslog TLS / Kafka, 4 правила корреляции (`ALFA_AI_001_JAILBREAK_BURST`, `ALFA_AI_002_MASS_DEANONYMIZATION`, `ALFA_AI_003_CIRCUIT_BREAKER_TRIPPED`, `ALFA_AI_004_SYSTEMATIC_HALLUCINATIONS`).
+* **Kaspersky Container Security (KCS):** CI/CD сканирование CVE образов Python/vLLM, контроль целостности подов (`readOnlyRootFilesystem`) и защита от побега из контейнера (Container Escape).
+* **Kaspersky Security for Storage (KSS):** Антивирусный и анти-эксплойт анализ входящих документов (PDF/DOCX) до занесения векторов в Qdrant (защита от RAG Poisoning).
+* **Kaspersky Anti Targeted Attack (KATA) & EDR Expert:** Защита изолированного контура GPU, драйверов NVIDIA и CUDA-библиотек от инъекций памяти.
+
 ---
 
 ## 🎯 Ключевые возможности решения
@@ -98,6 +107,12 @@
    - **Числовой аудитор** (сверка ставок, дат, сумм с исходными регламентами банка).
    - **Guided Decoding / JSON Schema** для строгой структуры ответов.
 
+4. **Эшелонированная защита и экосистема «Лаборатории Касперского»:**
+   - **Kaspersky KUMA (SIEM):** Централизованная корреляция событий безопасности в формате CEF (Syslog TLS 6514 / Kafka) и запуск плейбуков SOC банка.
+   - **Kaspersky Container Security (KCS):** Предотвращение уязвимостей цепочки поставок (Supply Chain) и защита среды исполнения Kubernetes.
+   - **Kaspersky Security for Storage (KSS):** Сканирование кредитных файлов и PDF/DOCX до парсинга в RAG-базу.
+   - **Kaspersky KATA & EDR Expert:** Защита физических хостов GPU и сетевого контура инференса от целевых атак.
+
 ---
 
 ## 🛠️ Программные микросервисы (`services/`) и DevOps (`devops/`)
@@ -105,8 +120,9 @@
 Исходный код компонентов разбит на независимые микросервисы в папке `services/`:
 
 ```
-├── devops/                      # Docker Compose, переменные окружения, оркестрация
-│   ├── docker-compose.yml
+├── devops/                      # Оркестрация, переменные окружения и деплой
+│   ├── docker-compose.yml       # Локальный запуск стека микросервисов
+│   ├── k8s/                     # 13 производственных K8s-манифестов (KCS, NetPol, HPA)
 │   ├── .env.example
 │   └── README.md
 └── services/
@@ -116,12 +132,18 @@
     ├── resilience-router/src/   # Circuit Breaker и каскадный фоллбэк моделей
     ├── semantic-cache/src/      # Семантический векторный кэш (косинусное сходство)
     ├── nli-fact-guard/src/      # NLI Cross-Encoder и числовой фактчекинг регламентов
-    └── audit-worm-logger/src/   # Неизменяемый WORM-аудит и экспорт метрик Prometheus
+    └── audit-worm-logger/src/   # WORM-аудит, экспорт CEF в Kaspersky KUMA SIEM и Prometheus
 ```
 
-### Локальный запуск всего стека:
+### Локальный запуск всего стека (Docker Compose):
 ```bash
 cd devops
 cp .env.example .env
 docker-compose up -d --build
 ```
+
+### Развертывание в Kubernetes:
+```bash
+kubectl apply -k devops/k8s/
+```
+

@@ -81,3 +81,24 @@ spec:
     ports:
     - protocol: TCP
       port: 8000
+
+---
+# Разрешает отправку CEF-событий аудита в Kaspersky KUMA SIEM и Kafka
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-kuma-siem
+  namespace: alfa-ai-gateway
+spec:
+  podSelector:
+    matchLabels:
+      app: audit-worm-logger
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - protocol: TCP
+      port: 6514 # Syslog over TLS к коллектору Kaspersky KUMA
+    - protocol: TCP
+      port: 9092 # Kafka Broker mTLS
+
