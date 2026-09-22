@@ -143,10 +143,10 @@ class NatashaPIIMasker:
             r'(?:(?i:\b(?:клиент(?:у|а|ом)?|заявител(?:ю|я|ем)?|заемщик(?:у|а|ом)?|плательщик(?:у|а|ом)?|получател(?:ю|я|ем)?|бенефициар(?:у|а|ом)?|фио|заемщик|я,)\b)\s*[:\-–—]?\s*)([A-ZА-ЯЁ][a-zа-яё]+(?:\s+[A-ZА-ЯЁ][a-zа-яё]+){1,2})'
         )
 
-        # 1. Financial & Account Identifiers (support arbitrary space/dash formatting)
-        self.card_pattern = re.compile(r'\b(?:\d[ \t\-]*?){13,19}\b')
+        # 1. Financial & Account Identifiers (supports spaces, dashes, dots, slashes, underscores, tildes, brackets, mixed)
+        self.card_pattern = re.compile(r'(?<!\d)(?:\d[- \t._/~–—]*){12,18}\d(?!\d)')
         self.inn_pattern = re.compile(
-            r'(?i)(?:\bИНН(?:\s+заемщика|\s+клиента|\s+организации)?\b\s*[:\-–—]?\s*)?(\b\d{1,6}(?:[ \t\-]+\d{1,6}){1,6}\b|\b\d{10}\b|\b\d{12}\b)'
+            r'(?i)(?:\bИНН(?:/[А-ЯЁA-Z0-9]+)?\b\s*[:\-–—]?\s*)?((?<!\d)\d{1,6}(?:[- \t._/~–—]+\d{1,6}){1,6}(?!\d)|\b\d{10}\b|\b\d{12}\b)'
         )
         self.cvv_pattern = re.compile(
             r'(?i)(?:\b(?:cvv2?|cvc2?|cid|код\s+безопасности|код\s+на\s+обороте)\b[^\d\n]{1,6})(\d{3,4})\b'
@@ -186,13 +186,16 @@ class NatashaPIIMasker:
             r'(?i)(?:\b(?:место\s+рождения|уроженец|уроженка)\s*[:\-–—]?\s*|(?:дата\s+и\s+место\s+рождения[^\n,]+,\s*))([^\n,;\.]+(?:г\.|гор\.|город|село|с\.|пос\.|деревня|д\.)?[^\n,;\.\)]+)'
         )
         
-        # 4. Contacts & Location (support diverse phone number formats: dots, brackets, solid digits, +7/8/7, mobile prefixes)
+        # 4. Contacts & Location (handles dots, slashes, underscores, tildes, unicode dashes, 007, and glued prefixes)
         self.email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b')
         self.phone_pattern = re.compile(
-            r'(?:(?:\+?7|8)[\s\.\-/]*)?(?:[\(\[]\s*\d{3,4}\s*[\)\]]|\b\d{3,4})[\s\.\-/]*\d{2,3}[\s\.\-/]*\d{2}[\s\.\-/]*\d{2}\b|'
-            r'(?:\+?7|8)[\s\.\-/]*(?:[\(\[]\s*\d{3,4}\s*[\)\]]|\d{3,4})[\s\.\-/]*\d{7}\b|'
-            r'\+?[78]\d{10}\b|'
-            r'(?:[\(\[]\s*\d{3,4}\s*[\)\]]|\b9\d{2})[\s\.\-/]*\d{2,3}[\s\.\-/]*\d{2}[\s\.\-/]*\d{2}\b'
+            r'(?:(?i:\b(?:тел(?:\.|ефон)?|моб(?:\.|ильный)?|т\.)\s*[:\-–—]?\s*))?'
+            r'(?P<num>'
+            r'(?:(?:\+?7|8|007)[\s\.\-_/–—~]*)?(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)\d{3,4})[\s\.\-_/–—~]*\d{2,3}[\s\.\-_/–—~]*\d{2}[\s\.\-_/–—~]*\d{2}(?!\d)|'
+            r'(?:(?:\+?7|8|007)[\s\.\-_/–—~]*)?(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)\d{3,4})[\s\.\-_/–—~]*\d{7}(?!\d)|'
+            r'(?:\+?7|8)\d{10}(?!\d)|'
+            r'(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)9\d{2})[\s\.\-_/–—~]*\d{2,3}[\s\.\-_/–—~]*\d{2}[\s\.\-_/–—~]*\d{2}(?!\d)'
+            r')'
         )
         self.address_line_pattern = re.compile(
             r'(?i)(?:\b(?:адрес(?:\s+постоянной|\s+фактической|\s+временной)?\s+(?:регистрации|проживания)|зарегистрирован\s+по\s+адресу|проживает\s+по\s+адресу)\b\s*[:\-–—]?\s*)(Россия[^\n]+|г\.[^\n]+|[0-9]{6},[^\n]+)'
@@ -259,17 +262,17 @@ class NatashaPIIMasker:
         for m in self.vu_pattern.finditer(text):
             add_span(m.start(1), m.end(1), 'DRIVER_LICENSE', m.group(1))
 
-        # 2. Bank Cards (Luhn validated)
+        # 2. Bank Cards (Luhn validated, supports spaces, dashes, dots, slashes, underscores, tildes, brackets, mixed)
         for m in self.card_pattern.finditer(text):
             raw = m.group(0)
-            cleaned = re.sub(r'[\s\-]', '', raw)
-            if len(cleaned) == 16 and luhn_checksum_valid(cleaned):
+            cleaned = re.sub(r'\D', '', raw)
+            if (13 <= len(cleaned) <= 19) and luhn_checksum_valid(cleaned):
                 add_span(m.start(), m.end(), 'CARD', raw)
 
-        # 3. INN (Checksum validated, supports spaces and dashes)
+        # 3. INN (Checksum validated, supports spaces, dashes, dots, slashes, underscores, tildes, brackets)
         for m in self.inn_pattern.finditer(text):
             raw = m.group(1) if m.group(1) else m.group(0)
-            clean = re.sub(r'[\s\-]', '', raw)
+            clean = re.sub(r'\D', '', raw)
             if len(clean) in (10, 12) and validate_inn(clean):
                 st = m.start(1) if m.group(1) else m.start(0)
                 en = m.end(1) if m.group(1) else m.end(0)
@@ -287,12 +290,14 @@ class NatashaPIIMasker:
         for m in self.email_pattern.finditer(text):
             add_span(m.start(), m.end(), 'EMAIL', m.group(0))
 
-        # 7. Phone (supports all diverse formats: dots, brackets, dashes, solid digits)
+        # 7. Phone (supports all diverse formats: dots, slashes, underscores, tildes, brackets, solid digits, 007, glued prefixes)
         for m in self.phone_pattern.finditer(text):
-            raw = m.group(0)
+            raw = m.group('num') if m.group('num') else m.group(0)
             clean = re.sub(r'\D', '', raw)
-            if len(clean) in (10, 11):
-                add_span(m.start(), m.end(), 'PHONE', raw)
+            if len(clean) in (10, 11) or (clean.startswith('007') and len(clean) == 13):
+                st = m.start('num') if m.group('num') else m.start(0)
+                en = m.end('num') if m.group('num') else m.end(0)
+                add_span(st, en, 'PHONE', raw)
 
         # 8. CVV
         for m in self.cvv_pattern.finditer(text):
