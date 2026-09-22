@@ -65,6 +65,37 @@ def validate_inn(inn: str) -> bool:
     return False
 
 # Whitelist of renowned poets, writers, artists, scientists, and historical personalities
+FAMOUS_PERSON_BASES: Set[str] = {
+    # Русские классики, поэты и писатели
+    "пушкин", "есенин", "лермонтов", "толст", "достоевск", "чехов", "маяковск",
+    "блок", "ахматов", "цветаев", "булгаков", "гоголь", "гогол", "тургенев",
+    "пастернак", "бродск", "мандельштам", "некрасов", "тютчев", "фет", "крылов",
+    "грибоедов", "куприн", "бунин", "набоков", "горьк", "высоцк", "окуджав",
+    "стругацк", "шолохов", "платонов", "хармс", "зощенк", "солженицын",
+    "рождественск", "евтушенк", "вознесенск", "пришвин", "бианки", "бажов",
+    # Зарубежная литература и драматургия
+    "шекспир", "байрон", "гете", "гёте", "данте", "гомер", "мольер", "сервантес",
+    "бальзак", "гюго", "дюма", "хемингуэй", "ремарк", "оруэлл", "кафк", "уайльд",
+    "диккенс", "дойл", "эдгар по", "лондон", "марк твен", "твен",
+    # Отечественная наука, космос и инженерия
+    "ломоносов", "менделеев", "попов", "циолковск", "королев", "курчатов", "павлов",
+    "мечников", "ландау", "капиц", "сахаров", "перельман", "сеченов", "тимирязев",
+    "гагарин", "титов", "леонов", "терешков",
+    # Мировая наука и мыслители
+    "ньютон", "эйнштейн", "галилей", "коперник", "тесл", "эдисон", "дарвин", "тьюринг",
+    "фейнман", "кюри", "архимед", "пифагор", "евклид", "паскаль", "декарт", "лейбниц", "хокинг",
+    # Музыка, композиторы и исполнители
+    "чайковск", "рахманинов", "глинка", "глинки", "мусоргск", "прокофьев", "шостакович",
+    "моцарт", "бах", "бетховен", "шопен", "вивальди", "верди", "вагнер", "паганини",
+    # Изобразительное искусство
+    "леонардо", "микеланджело", "рафаэль", "рембрандт", "ван гог", "пикассо", "моне",
+    "репин", "шишкин", "айвазовск", "кандинск", "малевич", "суриков", "васнецов",
+    # Философия и античность
+    "сократ", "платон", "аристотель", "кант", "гегель", "ницше", "шопенгауэр", "сенека", "марк аврелий",
+    # Современные технологические визионеры и предприниматели
+    "джобс", "маск", "гейтс", "цукерберг", "возняк"
+}
+
 FAMOUS_PERSONS: Set[str] = {
     # Russian Classic Literature & Poetry
     "пушкин", "пушкина", "пушкину", "пушкиным", "пушкине",
@@ -103,11 +134,12 @@ FAMOUS_PERSONS: Set[str] = {
     "гагарин", "гагарина", "гагарину", "гагариным", "гагарине",
     "королев", "королева", "королеву", "королевым", "королеве",
     "циолковский", "циолковского", "циолковскому", "циолковским", "циолковском",
-    # World Heritage
+    # World Heritage & Visionaries
     "ньютон", "ньютона", "эйнштейн", "эйнштейна", "шекспир", "шекспира",
     "байрон", "байрона", "гёте", "гете", "моцарт", "моцарта", "бах", "баха",
     "бетховен", "бетховена", "сократ", "сократа", "платон", "платона",
-    "аристотель", "аристотеля", "леонардо", "дарвин", "дарвина", "тесла"
+    "аристотель", "аристотеля", "леонардо", "дарвин", "дарвина", "тесла",
+    "джобс", "джобса", "джобсом", "маск", "маска", "маском"
 }
 
 class NatashaPIIMasker:
@@ -120,6 +152,7 @@ class NatashaPIIMasker:
     def __init__(self, granular_address: bool = False):
         self.granular_address = granular_address
         self.famous_persons = FAMOUS_PERSONS
+        self.famous_person_bases = FAMOUS_PERSON_BASES
         
         # Initialize lightweight NLP engines
         self.segmenter = Segmenter()
@@ -130,12 +163,18 @@ class NatashaPIIMasker:
         
         # Stylistic, comparative, and roleplay triggers (e.g. "Ты, как Пушкин", "в стиле Есенина")
         self.metaphor_pattern = re.compile(
-            r'(?i)\b(?:ты,?\s+как|как|в\s+стиле|в\s+манере|в\s+духе|словами|стихи|поэзи[яие]|стихотворени[яе]|произведени[яе]|творчеств[ое]|биографи[яи]|автор[а-я]*|писател[а-я]*|поэт[а-я]*|кто\s+такой|книг[а-я]*|роман[а-я]*|повест[а-я]*|цитат[а-я]*)\s*$'
+            r'(?i)\b(?:ты,?\s+как|как|как\s+если\s+бы|будто|словно|представь,?\s+что\s+ты|'
+            r'в\s+стиле|в\s+манере|в\s+духе|словами|стихи|поэзи[яие]|стихотворени[яе]|произведени[яе]|'
+            r'творчеств[ое]|биографи[яи]|автор[а-я]*|писател[а-я]*|поэт[а-я]*|кто\s+такой|книг[а-я]*|'
+            r'роман[а-я]*|повест[а-я]*|цитат[а-я]*|философи[яие]|теори[яие]|симфони[яие]|картин[а-я]*|'
+            r'по\s+заветам|по\s+рецепту|рассуждай|ответь|напиши)\b'
         )
 
         # Banking, transactional, and identity intent triggers anywhere in proximity
         self.banking_intent_pattern = re.compile(
-            r'(?i)\b(?:клиент[а-я]*|заявител[а-я]*|заемщик[а-я]*|плательщик[а-я]*|получател[а-я]*|бенефициар[а-я]*|от\s+клиента|от\s+кого|фио|перевести|переведи|перевод[а-я]*|отправить|отправь|перечислить|скинуть|пополнить|списать|счет[а-я]*|на\s+имя|в\s+пользу|заблокировать|разблокировать|анкет[а-я]*|я,)\b'
+            r'(?i)\b(?:клиент[а-я]*|заявител[а-я]*|заемщик[а-я]*|плательщик[а-я]*|получател[а-я]*|бенефициар[а-я]*|'
+            r'от\s+клиента|от\s+кого|фио|перевести|переведи|перевод[а-я]*|отправить|отправь|перечислить|'
+            r'скинуть|пополнить|списать|счет[а-я]*|на\s+имя|в\s+пользу|заблокировать|разблокировать|анкет[а-я]*|я,)\b'
         )
         
         # Explicit customer identity regex pattern (strictly requiring capitalized Name words)
@@ -212,29 +251,37 @@ class NatashaPIIMasker:
         if not words:
             return False
 
-        # Context window preceding the name
-        prefix = full_text[max(0, start - 50):start]
+        # Context window preceding and following the detected name (bidirectional)
+        prefix = full_text[max(0, start - 80):start]
+        suffix = full_text[end:min(len(full_text), end + 80)]
 
-        # 1. Metaphor, comparative, roleplay or literary context check:
-        # e.g., "Ты, как Александр Пушкин", "в стиле Льва Толстого", "стихи Сергея Есенина"
-        if self.metaphor_pattern.search(prefix):
-            return False
+        # 1. Metaphor, comparative, roleplay or literary context check
+        has_metaphor = bool(self.metaphor_pattern.search(prefix))
 
-        # 2. Check if name matches a famous cultural/historical personality
+        # 2. Check if name matches a famous cultural/historical personality or public figure
         words_lower = [w.lower().strip(" ,.:;!?") for w in words]
-        is_famous = any(w in self.famous_persons for w in words_lower)
+        is_famous = any(
+            any(w.startswith(b) for b in self.famous_person_bases) or w in self.famous_persons
+            for w in words_lower
+        )
 
-        # Check if preceded by a banking/transaction intent or identity label
-        has_banking_intent = bool(self.banking_intent_pattern.search(prefix))
+        # 3. Check if accompanied by a banking/transaction intent or identity label in proximity
+        has_banking_intent = bool(
+            self.banking_intent_pattern.search(prefix) or self.banking_intent_pattern.search(suffix)
+        )
 
         if is_famous:
             # Famous personality is ONLY masked if explicitly bound to a banking/transaction intent:
-            # e.g. "Клиент: Пушкин Александр", "Перевести 5000 рублей Пушкину на карту..."
-            if has_banking_intent:
+            # e.g. "Клиент: Маяковский В.В.", "Перевести 5000 рублей Пушкину на карту..."
+            # and is NOT part of a metaphor/roleplay prompt ("Ты, как Пушкин", "в стиле Есенина")
+            if has_banking_intent and not has_metaphor:
                 return True
             return False
 
-        # 3. For ordinary names:
+        # 4. For ordinary names:
+        if has_metaphor:
+            return False
+
         # Single capitalized word without banking intent is rejected to avoid false positives (e.g. "Позвони", "Тикет")
         if len(words) < 2 and not has_banking_intent:
             return False
