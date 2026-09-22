@@ -174,12 +174,14 @@ class NatashaPIIMasker:
         self.banking_intent_pattern = re.compile(
             r'(?i)\b(?:клиент[а-я]*|заявител[а-я]*|заемщик[а-я]*|плательщик[а-я]*|получател[а-я]*|бенефициар[а-я]*|'
             r'от\s+клиента|от\s+кого|фио|перевести|переведи|перевод[а-я]*|отправить|отправь|перечислить|'
-            r'скинуть|пополнить|списать|счет[а-я]*|на\s+имя|в\s+пользу|заблокировать|разблокировать|анкет[а-я]*|я,)\b'
+            r'скинуть|пополнить|списать|счет[а-я]*|на\s+имя|в\s+пользу|заблокировать|разблокировать|анкет[а-я]*|я,|'
+            r'зовут|ее\s+зовут|его\s+зовут|гражданин[а-я]*|гражданк[а-я]*|обратил[а-я]*|паспорт[а-я]*|карточк[а-я]*|карту|'
+            r'пользовател[а-я]*|владелец|брат[а-я]*|сестр[а-я]*|друг[а-я]*|коллег[а-я]*)\b'
         )
         
         # Explicit customer identity regex pattern (strictly requiring capitalized Name words)
         self.identity_person_pattern = re.compile(
-            r'(?:(?i:\b(?:клиент(?:у|а|ом)?|заявител(?:ю|я|ем)?|заемщик(?:у|а|ом)?|плательщик(?:у|а|ом)?|получател(?:ю|я|ем)?|бенефициар(?:у|а|ом)?|фио|заемщик|я,)\b)\s*[:\-–—]?\s*)([A-ZА-ЯЁ][a-zа-яё]+(?:\s+[A-ZА-ЯЁ][a-zа-яё]+){1,2})'
+            r'(?:(?i:\b(?:клиент[а-я]*|заявител[а-я]*|заемщик[а-я]*|плательщик[а-я]*|получател[а-я]*|бенефициар[а-я]*|фио|я|меня\s+зовут|зовут|ее\s+зовут|его\s+зовут|гражданин[а-я]*|гражданк[а-я]*|обратил(?:ся|ась)|пользовател[а-я]*|владелец|от|с\s+уважением,?)\b)\s*[:\-–—]?\s*)([A-ZА-ЯЁ][a-zа-яё]+(?:\s+[A-ZА-ЯЁ][a-zа-яё]+){1,2})'
         )
 
         # 1. Financial & Account Identifiers (supports spaces, dashes, dots, slashes, underscores, tildes, brackets, mixed)
@@ -188,56 +190,79 @@ class NatashaPIIMasker:
             r'(?i)(?:\bИНН(?:/[А-ЯЁA-Z0-9]+)?\b\s*[:\-–—]?\s*)?((?<!\d)\d{1,6}(?:[- \t._/~–—]+\d{1,6}){1,6}(?!\d)|\b\d{10}\b|\b\d{12}\b)'
         )
         self.cvv_pattern = re.compile(
-            r'(?i)(?:\b(?:cvv2?|cvc2?|cid|код\s+безопасности|код\s+на\s+обороте)\b[^\d\n]{1,6})(\d{3,4})\b'
+            r'(?i)(?:\b(?:cvv2?|cvc2?|cid|код\s+безопасности|код\s+на\s+обороте|свв|цвв|'
+            r'(?:последние\s+)?три\s+цифр[ыок]+(?:\s+сзади|\s+на\s+обороте)?|'
+            r'(?:последние\s+)?(?:три\s+)?циферк[иек]+(?:\s+сзади|\s+на\s+обороте)?|'
+            r'код\s+сзади)\b[^\d\n]{0,25}?(?:были?|равен|указан)?[:\-–—\s]*?)(\d{3,4})\b'
         )
         self.pin_pattern = re.compile(
-            r'(?i)(?:\b(?:пин(?:-?код)?|pin(?:-?code)?)\b[^\d\n]{0,10}?[(\[\s]*?)(\d{4})(?=[)\]\s,.;\n]|$)'
+            r'(?i)(?:\b(?:пин(?:-?код)?|pin(?:-?code)?|пароль(?:\s+от\s+карты)?)\b[^\d\n]{0,20}?(?:был|стоял|установлен|равен)?[:\-–—\s]*?)(\d{4})(?=[)\]\s,.;\n]|$)'
         )
         self.cardholder_pattern = re.compile(
-            r'(?i)(?:\b(?:держатель(?:\s+карты)?|cardholder(?:\s+name)?|card\s*holder|на\s+карте\s+указано\s+имя)\b\s*[:\-–—]?\s*)([A-Z\s]{3,35}|[А-ЯЁ\s]{3,35})(?=[,\n\.;\)]|$)'
+            r'(?i)(?:\b(?:держатель(?:\s+карты)?|cardholder(?:\s+name)?|card\s*holder|'
+            r'(?:имя\s+)?(?:на\s+карте|на\s+пластике)(?:\s+(?:указано|написано|выбито|стоит))?|'
+            r'карто?ч?ка\s+на\s+имя|на\s+имя\s+держателя)\b\s*[:\-–—]?\s*)'
+            r'([A-Z\s]{3,35}|[А-ЯЁ\s]{3,35})(?=[,\n\.;\)]|$)'
         )
         
         # 2. Government IDs & Documents
         self.vu_pattern = re.compile(
-            r'(?i)(?:\b(?:водительск(?:ое|их)?\s+(?:удостоверени[ея]|прав[ао]?)|в/?у)\b[^\d\n]{0,10}?)([0-9]{2}\s?[0-9А-ЯA-Z]{2}\s?[0-9]{6})\b'
+            r'(?i)(?:\b(?:водительск[а-я\s]*(?:удостоверени[а-я]*|прав[а-я]*)|прав[а-я]*|в/?у)\b[^\d\n]{0,35}?(?:сери[яи]\s*)?)'
+            r'([0-9]{2}\s?[0-9А-ЯA-Z]{2}\s*(?:№|номер\s*)?[0-9]{6})\b'
         )
         self.pass_code_pattern = re.compile(
-            r'(?i)(?:\b(?:код(?:\s+подразделения)?|подразделение|к/п)\b\s*[:\-–—]?\s*)(\b\d{3}[-\s]\d{3}\b)'
+            r'(?i)\b(?:код(?:\s+на\s+штампе|\s+подразделени[яе]|\s+выдачи|\s+отделения|\s+органа)?|подразделени[ея]|отделени[а-я]*|к/?п)\b[^\d\n]{0,15}?(\b\d{3}[-\s]\d{3}\b)'
         )
         self.pass_pattern = re.compile(
-            r'(?i)(?:(?:\b(?:паспорт(?:ные\s+данные|а|\s+РФ)?|реквизиты\s+паспорта)\b\s*[:\-–—]?\s*)?(?:серия\s*)?(\b\d{2}\s?\d{2}\b)\s*(?:№|номер)?\s*(\b\d{6}\b))'
+            r'(?i)(?:'
+            r'\b(?:паспорт(?:[а-я\s]*РФ|[а-я]*ные\s+данные|[а-я]*)?|по\s+паспорту|в\s+паспорте|сери[яи]\s+и\s+номер|данные\s+документа|реквизиты\s+паспорта|мой\s+паспорт)\b[^\d\n]{0,35}?(?:сери[яи]\s*)?(\b\d{2}\s?\d{2}\b)\s*(?:№|номер|n\.)?\s*(\b\d{6}\b)|'
+            r'\bсери[яи]\s*(\b\d{2}\s?\d{2}\b)\s*(?:№|номер|n\.)?\s*(\b\d{6}\b)'
+            r')'
         )
         self.issuer_pattern = re.compile(
-            r'(?i)(?:\b(?:кем\s+выдан|орган[,\s]+выдавший\s+(?:документ|паспорт)|орган\s+выдачи|выдан(?:\s+паспорт)?)\b\s*[:\-–—]?\s*)([^\n,;]+?(?:отделом|уфмс|мвд|овд|ровд|гу\s+мвд|тп\s+№|отделением|паспортным|умвд)[^\n,;]+)'
+            r'(?i)(?:\b(?:кем\s+выдан|орган[,\s]+выдавший[^\n,;]*|орган\s+выдачи|выдан[а-я]*|получал[а-я]*|оформлял[а-я]*|выдали)\b[^\n,;:]{0,25}?(?:его\s+|в\s+|через\s+)?[:\-–—]?\s*)'
+            r'([^\n,;\(\)]+?(?:отдел[а-я]*|уфмс|мвд|овд|ровд|гу\s+мвд|умвд|тп\s+№|отделени[а-я]*|паспортн[а-я]*)[^\n,;\(\)]*?)'
+            r'(?=\s+\d{2}[./]\d{2}[./]\d{4}|\s*\(|\s*,|\s*;|\s*\n|$)'
         )
         self.pass_date_pattern = re.compile(
-            r'(?i)(?:\b(?:дата\s+выдачи(?:\s+паспорта)?|выдан(?:\s+паспорт)?(?:\s+от)?)\b\s*[:\-–—]?\s*)(\d{2}[./]\d{2}[./]\d{4})'
+            r'(?i)(?:'
+            r'(?:\b(?:дата\s+выдачи(?:\s+паспорта)?|выдан[а-я]*(?:\s+паспорт)?(?:\s+от)?|получен[а-я]*|оформлен[а-я]*|получал[а-я]*|оформлял[а-я]*)\b[^\d\n]{0,120}?)(\d{2}[./]\d{2}[./]\d{4})|'
+            r'(\d{2}[./]\d{2}[./]\d{4})\s*(?:года\s+)?(?:\b(?:выдачи|получения|оформления)\b)'
+            r')'
         )
         self.citizen_pattern = re.compile(
-            r'(?i)(?:\b(?:гражданство|гражданин|гражданка|подданство)\b\s*[:\-–—]?\s*)(РФ|Российская Федерация|Россия|Республика\s+[А-Яа-яЁё]+|[А-Яа-яЁё\-]{3,20})\b'
+            r'(?i)(?:\b(?:гражданств[оа-я]*|гражданин[а-я]*|гражданк[а-я]*|подданств[оа-я]*)\b[^\n,;:]{0,15}?(?:я\s+)?[:\-–—]?\s*)(РФ|Российская Федерация|Росси[яие]|Республика\s+[А-Яа-яЁё]+|[А-Яа-яЁё\-]{3,20})\b'
         )
         
         # 3. Biographic & Personal Data
         self.birth_date_pattern = re.compile(
-            r'(?i)(?:\b(?:дата(?:\s+и\s+место)?\s+рождения|д\.?р\.?|родил(?:ся|ась)|г\.?р\.?)\b\s*(?:заявителя)?\s*[:\-–—]?\s*)(\d{2}[./]\d{2}[./]\d{4})'
+            r'(?i)(?:'
+            r'(?:\b(?:дата(?:\s+и\s+место)?\s+рождения|д\.?р\.?|родил(?:ся|ась)|г\.?р\.?|рождени[яе]|появил(?:ся|ась)\s+на\s+свет|моего\s+рождения)\b[^\d\n]{0,25}?)(\d{2}[./]\d{2}[./]\d{4})|'
+            r'(\d{2}[./]\d{2}[./]\d{4})\s*(?:г\.?\s*р\.?|год[а-я]*\s+рождени[яе])'
+            r')'
         )
         self.birth_place_pattern = re.compile(
-            r'(?i)(?:\b(?:место\s+рождения|уроженец|уроженка)\s*[:\-–—]?\s*|(?:дата\s+и\s+место\s+рождения[^\n,]+,\s*))([^\n,;\.]+(?:г\.|гор\.|город|село|с\.|пос\.|деревня|д\.)?[^\n,;\.\)]+)'
+            r'(?i)(?:'
+            r'\b(?:родил(?:ся|ась)|появил(?:ся|ась)\s+на\s+свет|урожен(?:ец|ка)|родом)\b[^\n,;]{0,45}?\b(?:в|из)\s+(?:городе\s+|гор\.\s*|г\.\s*)?([А-ЯЁ][а-яё\-]+)|'
+            r'\b(?:место\s+рождени[яе]|урожен(?:ец|ка))\s*[:\-–—]?\s*(?:городе\s+|гор\.\s*|г\.\s*)?([А-ЯЁ][а-яё\-]+)'
+            r')'
         )
         
         # 4. Contacts & Location (handles dots, slashes, underscores, tildes, unicode dashes, 007, and glued prefixes)
         self.email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b')
         self.phone_pattern = re.compile(
-            r'(?:(?i:\b(?:тел(?:\.|ефон)?|моб(?:\.|ильный)?|т\.)\s*[:\-–—]?\s*))?'
+            r'(?:(?i:\b(?:тел(?:\.|ефон)?|моб(?:\.|ильный)?|т\.|номер(?:\s+для\s+связи)?|сотовом[уе]?|сотовый)\s*[:\-–—]?\s*))?'
             r'(?P<num>'
-            r'(?:(?:\+?7|8|007)[\s\.\-_/–—~]*)?(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)\d{3,4})[\s\.\-_/–—~]*\d{2,3}[\s\.\-_/–—~]*\d{2}[\s\.\-_/–—~]*\d{2}(?!\d)|'
-            r'(?:(?:\+?7|8|007)[\s\.\-_/–—~]*)?(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)\d{3,4})[\s\.\-_/–—~]*\d{7}(?!\d)|'
-            r'(?:\+?7|8)\d{10}(?!\d)|'
-            r'(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)9\d{2})[\s\.\-_/–—~]*\d{2,3}[\s\.\-_/–—~]*\d{2}[\s\.\-_/–—~]*\d{2}(?!\d)'
+            r'(?<!\d)(?:(?:\+?7|8|007)[\s\.\-_/–—~]*)?(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)\d{3,4})[\s\.\-_/–—~]*\d{2,3}[\s\.\-_/–—~]*\d{2}[\s\.\-_/–—~]*\d{2}(?!\d)|'
+            r'(?<!\d)(?:(?:\+?7|8|007)[\s\.\-_/–—~]*)?(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)\d{3,4})[\s\.\-_/–—~]*\d{7}(?!\d)|'
+            r'(?<!\d)(?:\+?7|8)\d{10}(?!\d)|'
+            r'(?<!\d)(?:[\(\[]\s*\d{3,4}\s*[\)\]]|(?<!\d)9\d{2})[\s\.\-_/–—~]*\d{2,3}[\s\.\-_/–—~]*\d{2}[\s\.\-_/–—~]*\d{2}(?!\d)'
             r')'
         )
         self.address_line_pattern = re.compile(
-            r'(?i)(?:\b(?:адрес(?:\s+постоянной|\s+фактической|\s+временной)?\s+(?:регистрации|проживания)|зарегистрирован\s+по\s+адресу|проживает\s+по\s+адресу)\b\s*[:\-–—]?\s*)(Россия[^\n]+|г\.[^\n]+|[0-9]{6},[^\n]+)'
+            r'(?i)(?:\b(?:адрес(?:[а-я\s]*регистрации|[а-я\s]*проживания)?|'
+            r'зарегистрирован[а-я\s]*|прожива[а-я]*|прописан[а-я]*|жив[а-я]*|доставк[а-я]*)\b[^\n]{0,35}?(?:по\s+адресу\s+|в\s+|на\s+адрес\s+|на\s+)?[:\-–—]?\s*)'
+            r'((?:г\.|гор\.|город\s+|Россия|[0-9]{6},|[А-ЯЁ][а-яё\-]+|[A-ZА-ЯЁ]{2,5})[^\n;]+?(?:ул\.|улиц[а-я]*|наб\.|пр-?к?т|просп[а-я]*|пер\.|переулок|шоссе|ш\.|бул\.|бульвар|д\.|дом|Арбат)[^\n]+?[0-9]+(?:[,\s]+(?:кв\.|квартир[а-я]*|корп\.|к\.|оф\.|строени[ея]|стр\.)\s*[0-9]+)*)(?=[,\.;\n\)]|\s+хотя|\s+но|\s+паспорт|$)'
         )
 
     def is_person_pii(self, raw_name: str, full_text: str, start: int, end: int) -> bool:
@@ -255,8 +280,10 @@ class NatashaPIIMasker:
         prefix = full_text[max(0, start - 80):start]
         suffix = full_text[end:min(len(full_text), end + 80)]
 
-        # 1. Metaphor, comparative, roleplay or literary context check
-        has_metaphor = bool(self.metaphor_pattern.search(prefix))
+        # 1. Metaphor, comparative, roleplay or literary context check restricted to the current sentence/clause prefix
+        line_prefix = prefix.split('\n')[-1]
+        clause_prefix = re.split(r'[\.\?!;]\s+', line_prefix)[-1]
+        has_metaphor = bool(self.metaphor_pattern.search(clause_prefix))
 
         # 2. Check if name matches a famous cultural/historical personality or public figure
         words_lower = [w.lower().strip(" ,.:;!?") for w in words]
@@ -358,31 +385,45 @@ class NatashaPIIMasker:
         for m in self.cardholder_pattern.finditer(text):
             add_span(m.start(1), m.end(1), 'CARDHOLDER', m.group(1).strip())
 
-        # 11. Birth date
+        # 11. Birth date (prefix or suffix triggers)
         for m in self.birth_date_pattern.finditer(text):
-            add_span(m.start(1), m.end(1), 'BIRTHDATE', m.group(1))
+            val = m.group(1) or m.group(2)
+            st = m.start(1) if m.group(1) else m.start(2)
+            en = m.end(1) if m.group(1) else m.end(2)
+            add_span(st, en, 'BIRTHDATE', val)
 
         # 12. Passport issue date
         for m in self.pass_date_pattern.finditer(text):
             add_span(m.start(1), m.end(1), 'PASSPORT_DATE', m.group(1))
 
-        # 13. Birth place
+        # 13. Birth place (conversational: "родился в Самаре", "уроженец г. Казань", "родом из ...")
         for m in self.birth_place_pattern.finditer(text):
-            val = m.group(1).strip()
-            add_span(m.start(1), m.end(1), 'BIRTHPLACE', val)
+            val = (m.group(1) or m.group(2)).strip()
+            st = m.start(1) if m.group(1) else m.start(2)
+            en = m.end(1) if m.group(1) else m.end(2)
+            add_span(st, en, 'BIRTHPLACE', val)
 
         # 14. Citizenship
         for m in self.citizen_pattern.finditer(text):
             add_span(m.start(1), m.end(1), 'CITIZENSHIP', m.group(1).strip())
 
-        # 15. Passport issuer
+        # 15. Passport issuer (handles conversational "паспорт получал в ...", "выдан через ...")
         for m in self.issuer_pattern.finditer(text):
-            add_span(m.start(1), m.end(1), 'PASSPORT_ISSUER', m.group(1).strip())
+            raw_val = m.group(1).strip()
+            clean_val = re.sub(r'^(?:его\s+|в\s+|через\s+)+', '', raw_val)
+            st = m.start(1) + (len(raw_val) - len(clean_val))
+            en = m.end(1)
+            add_span(st, en, 'PASSPORT_ISSUER', clean_val)
 
-        # 16. Address (Full line or granular breakdown)
+        # 16. Address (Full line or granular breakdown, handles conversational "живу в Москве на Тверской...")
         if not self.granular_address:
             for m in self.address_line_pattern.finditer(text):
-                add_span(m.start(1), m.end(1), 'ADDRESS', m.group(1).strip())
+                raw_val = m.group(1).strip()
+                clean_val = re.sub(r'^(?:сейчас\s+|по\s+адресу\s+|в\s+|на\s+адрес\s+|на\s+)+', '', raw_val)
+                clean_val = re.sub(r'(?:,\s*(?:хотя|паспорт|прописан|тел|но|к/п|код|выдан).*)$', '', clean_val)
+                st = m.start(1) + (len(raw_val) - len(clean_val))
+                en = st + len(clean_val)
+                add_span(st, en, 'ADDRESS', clean_val)
         else:
             for m in self.addr_extractor(text):
                 t_label = m.fact.type or 'addr_part'
@@ -402,29 +443,35 @@ class NatashaPIIMasker:
             if self.is_person_pii(val, text, m.start(1), m.end(1)):
                 add_span(m.start(1), m.end(1), 'FIO', val)
 
-        # 18. Natasha NER for ФИО (PER) with Intent & Cultural-figure filtering
+        # 18. Natasha NER for ФИО (PER) with Intent & Cultural-figure filtering and span merging
         doc = Doc(text)
         doc.segment(self.segmenter)
         doc.tag_ner(self.ner_tagger)
-        for s in doc.spans:
-            if s.type == 'PER':
-                raw_name = s.text.strip()
-                st = s.start
-                en = s.stop
-                # Strip leading prefix if bound to intro particle
-                if raw_name.startswith('Я, '):
-                    raw_name = raw_name[3:].strip()
-                    st += 3
-                
-                # Clean trailing preposition if attached by NER
-                cleaned_name = re.sub(r'\s+\b(?:по|в|на|и|с|о|от|к|для|при|из|под|за)\b\s*$', '', raw_name)
-                if len(cleaned_name) < len(raw_name):
-                    en = st + len(cleaned_name)
-                    raw_name = cleaned_name
+        per_spans = [s for s in doc.spans if s.type == 'PER']
+        merged_spans: List[Tuple[int, int, str]] = []
+        for s in per_spans:
+            if merged_spans and merged_spans[-1][1] <= s.start and text[merged_spans[-1][1]:s.start].strip() == '':
+                prev_st, prev_en, prev_text = merged_spans.pop()
+                merged_spans.append((prev_st, s.stop, text[prev_st:s.stop]))
+            else:
+                merged_spans.append((s.start, s.stop, s.text))
 
-                # Apply intent-aware & cultural figure filtering
-                if self.is_person_pii(raw_name, text, st, en):
-                    add_span(st, en, 'FIO', raw_name)
+        for st, en, raw_name in merged_spans:
+            raw_name = raw_name.strip()
+            # Strip leading prefix if bound to intro particle
+            if raw_name.startswith('Я, '):
+                raw_name = raw_name[3:].strip()
+                st += 3
+            
+            # Clean trailing preposition if attached by NER
+            cleaned_name = re.sub(r'\s+\b(?:по|в|на|и|с|о|от|к|для|при|из|под|за)\b\s*$', '', raw_name)
+            if len(cleaned_name) < len(raw_name):
+                en = st + len(cleaned_name)
+                raw_name = cleaned_name
+
+            # Apply intent-aware & cultural figure filtering
+            if self.is_person_pii(raw_name, text, st, en):
+                add_span(st, en, 'FIO', raw_name)
 
         # Sort spans by start position ascending
         spans.sort(key=lambda x: x[0])
