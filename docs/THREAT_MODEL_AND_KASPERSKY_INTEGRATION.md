@@ -2,7 +2,7 @@
 
 > 🛡️ **Интерактивная визуализация**: Доступна [**Интерактивная HTML-версия модели угроз**](threat_model.html) с живым симулятором CEF-событий для KUMA SIEM, интерактивным фильтром матрицы OWASP LLM 2025 и архитектурной картой эшелонированной защиты.
 
-Документ определяет модель угроз для корпоративного LLM-шлюза банка (**Alfa AI Gateway**) в соответствии с требованиями **ФСТЭК России**, положений **Банка России 683-П / 716-П / 757-П**, стандарта **ГОСТ Р 57580.1**, классификации **OWASP Top 10 for LLM Applications (2025)**, а также регламентирует интеграцию с продуктами **«Лаборатории Касперского»**.
+Документ определяет модель угроз для корпоративного LLM-шлюза банка (**Alfa AI Gateway**) в соответствии с требованиями **ФСТЭК России**, положений **Банка России 683-П / 716-П / 757-П**, стандарта **ГОСТ Р 57580.1**, классификации **OWASP Top 10 for LLM Applications (2025)**, а также регламентирует применение специализированных средств защиты информации и компенсации рисков (стек KUMA SIEM, KCS, KSS, KATA / EDR Expert, KWTS) и сопоставление с ведущими международными решениями (Splunk, Palo Alto Prisma Cloud, Trend Micro, CrowdStrike, Cloudflare).
 
 ---
 
@@ -71,9 +71,21 @@
 
 ---
 
-## 3. Детализация компонентов защиты «Лаборатории Касперского»
+## 3. Детализация средств защиты и сопоставление с международными аналогами
 
-### 3.1. Kaspersky Unified Monitoring and Analysis Platform (KUMA SIEM)
+Для обеспечения технологической нейтральности и гибкости архитектура шлюза спроектирована по принципу **Vendor-Agnostic Interface**: взаимодействие со средствами защиты осуществляется через стандартизированные протоколы (Syslog TLS / ArcSight CEF, ICAP, eBPF, OCI). Это позволяет использовать как развернутый в контуре банка стек продуктов, так и международные решения корпоративного класса (Global Tier-1):
+
+| Класс средств защиты | Продукт в контуре банка | Международные аналоги (Global Tier-1) | Стандарт интеграции | Роль в контуре LLM-шлюза |
+| :--- | :--- | :--- | :--- | :--- |
+| **SIEM & Security Analytics** | **KUMA SIEM** | **Splunk Enterprise Security**, **IBM QRadar**, **Microsoft Sentinel**, **Elastic Security** | Syslog TLS (порт 6514), CEF, Kafka | Прием WORM-логов, корреляция всплесков Jailbreak и аномалий де-маскирования ПДн |
+| **Container & K8s Security** | **Kaspersky Container Security (KCS)** | **Palo Alto Prisma Cloud**, **Aqua Security**, **Sysdig Secure**, **Wiz** | OCI Image Scan, eBPF sensor, K8s Admission | Сканирование образов Python/vLLM на CVE до релиза, блокировка Container Escape на GPU |
+| **Storage & RAG Anti-Malware** | **Kaspersky Security for Storage (KSS)** | **Trend Micro Deep Security / Cloud One**, **Trellix Storage Security** | ICAP Protocol, RPC Storage API | Потоковый пре-скан клиентских PDF-досье и регламентов до векторизации в Qdrant |
+| **EDR & Host Defense (GPU)** | **KATA & EDR Expert** | **CrowdStrike Falcon**, **SentinelOne Singularity**, **Microsoft Defender for Endpoint** | Linux Kernel Module, eBPF telemetry | Контроль целостности ядра Linux на серверах NVIDIA A100, защита видеодрайверов и CUDA |
+| **Perimeter Web WAF & Proxy** | **Kaspersky Web Traffic Security (KWTS)** | **Cloudflare WAF / API Shield**, **F5 BIG-IP Advanced WAF**, **Akamai App & API Protector** | HTTP/2, WebSocket, ГОСТ TLS 1.3 | Фильтрация входящих клиентских сессий, защита от сетевого флуда и L7 DoS на периметре |
+
+---
+
+### 3.1. KUMA SIEM (Security Information and Event Management)
 **Назначение:** центральный сбор, нормализация и корреляция событий безопасности со всех узлов LLM-шлюза.
 * **Протокол передачи:** Syslog по TLS (mTLS) или выделенный топик Apache Kafka `alfa.kuma.ai-gateway.events`.
 * **Формат данных:** Common Event Format (CEF).
@@ -112,7 +124,7 @@
 
 ---
 
-## 4. Спецификация формата событий CEF для передачи в Kaspersky KUMA
+## 4. Спецификация формата событий CEF для SIEM-систем (KUMA, Splunk, QRadar)
 
 Каждое критичное событие безопасности сериализуется модулем `audit-worm-logger` по стандарту ArcSight / KUMA CEF:
 

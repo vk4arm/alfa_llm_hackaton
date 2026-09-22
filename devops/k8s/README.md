@@ -42,7 +42,7 @@ kubectl get pods -n alfa-ai-gateway -o wide
 
 ---
 
-## 🛡️ Требования к информационной безопасности и интеграция с «Лабораторией Касперского»:
+## 🛡️ Требования к информационной безопасности и средства компенсации рисков:
 
 1. **Kaspersky Unified Monitoring and Analysis Platform (KUMA SIEM):**
    - Модуль `audit-worm-logger` передает события безопасности (Jailbreak, PII Tokenization, Hallucination Contradiction, Circuit Tripped) по протоколу Syslog over TLS (порт 6514) в формате CEF (Common Event Format).

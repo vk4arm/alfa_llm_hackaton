@@ -525,11 +525,11 @@
       </div>
 
       <h1 class="hero-title">
-        Модель угроз безопасности LLM и защита со средствами <span class="green">«Лаборатории Касперского»</span>
+        Модель угроз безопасности LLM и <span class="green">эшелоны компенсации рисков</span>
       </h1>
 
       <p class="hero-desc">
-        Комплексная спецификация модели угроз для корпоративного шлюза генеративного искусственного интеллекта Альфа-Банка (<strong>Alfa AI Gateway</strong>). Эшелонированное предотвращение рисков утечки персональных данных, атак Prompt Injection, отравления RAG-баз и интеграция с корпоративной SIEM-системой <strong>Kaspersky KUMA</strong>, защитой контейнеров <strong>KCS</strong>, хранилищ <strong>KSS</strong> и серверов инференса <strong>KATA / EDR Expert</strong>.
+        Комплексная спецификация модели угроз для корпоративного шлюза генеративного искусственного интеллекта Альфа-Банка (<strong>Alfa AI Gateway</strong>). Эшелонированное предотвращение рисков утечки персональных данных, атак Prompt Injection, отравления RAG-баз и подключение к корпоративной SIEM-системе <strong>KUMA</strong> (совместимо со <strong>Splunk</strong> / <strong>QRadar</strong>), защите контейнеров <strong>KCS</strong> (аналог <strong>Prisma Cloud</strong>), хранилищ <strong>KSS</strong> (аналог <strong>Trend Micro</strong>) и хостов инференса <strong>KATA / EDR Expert</strong> (аналог <strong>CrowdStrike</strong>).
       </p>
 
       <div class="kpi-row">
@@ -543,7 +543,7 @@
         </div>
         <div class="kpi-card">
           <div class="kpi-val" style="color: #34d399;">5</div>
-          <div class="kpi-label">Продуктов «Лаборатории Касперского»</div>
+          <div class="kpi-label">Специализированных средств защиты</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-val" style="color: #fbbf24;">4</div>
@@ -725,10 +725,10 @@
        ========================================================================= -->
   <section class="section-wrap" id="kaspersky">
     <div class="container">
-      <span class="sec-tag" style="color: #34d399;">Раздел 4 &bull; Отечественный стек ИБ</span>
-      <h2 class="sec-title">Экосистема продуктов «Лаборатории Касперского»</h2>
+      <span class="sec-tag" style="color: #34d399;">Раздел 4 &bull; Стек средств защиты информации</span>
+      <h2 class="sec-title">Стек средств защиты и международные аналоги</h2>
       <p class="sec-desc">
-        Вместо разрозненных утилит в контур банка внедряется согласованный комплекс решений российского вендора, полностью покрывающий жизненный цикл контейнеров, документов, хостов и мониторинга событий.
+        Архитектура шлюза спроектирована по принципу вендоронезависимости (Vendor-Agnostic Interface): взаимодействие со средствами защиты осуществляется через стандартизированные протоколы (CEF/Syslog TLS, ICAP, eBPF, OCI). Это обеспечивает эффективную компенсацию рисков как средствами, развернутыми в контуре банка, так и ведущими международными решениями класса Global Tier-1.
       </p>
 
       <div class="kaspersky-grid">
@@ -736,8 +736,8 @@
           <div class="k-card-header">
             <div class="k-icon">🛡️</div>
             <div>
-              <div class="k-title">Kaspersky KUMA</div>
-              <div class="k-role">SIEM &amp; Корреляция событий</div>
+              <div class="k-title">KUMA (SIEM &amp; Event Correlation)</div>
+              <div class="k-role">Централизованный сбор и корреляция событий</div>
             </div>
           </div>
           <p class="k-desc">
@@ -747,7 +747,7 @@
             <span class="k-tag">CEF ArcSight</span>
             <span class="k-tag">TLS Syslog 6514</span>
             <span class="k-tag">Kafka WORM</span>
-            <span class="k-tag">ГОСТ Р 57580.1</span>
+            <span class="k-tag" style="color: #93c5fd; border-color: rgba(59, 130, 246, 0.4);">Аналоги: Splunk ES, IBM QRadar, MS Sentinel</span>
           </div>
         </div>
 
@@ -766,7 +766,7 @@
             <span class="k-tag">CVE Image Scan</span>
             <span class="k-tag">Runtime Sensor</span>
             <span class="k-tag">Anti-Escape</span>
-            <span class="k-tag">CIS K8s Benchmark</span>
+            <span class="k-tag" style="color: #93c5fd; border-color: rgba(59, 130, 246, 0.4);">Аналоги: Palo Alto Prisma Cloud, Aqua, Sysdig</span>
           </div>
         </div>
 
@@ -785,7 +785,7 @@
             <span class="k-tag">Anti-Exploit</span>
             <span class="k-tag">RAG Shield</span>
             <span class="k-tag">PDF/DOCX Scan</span>
-            <span class="k-tag">Heuristics</span>
+            <span class="k-tag" style="color: #93c5fd; border-color: rgba(59, 130, 246, 0.4);">Аналоги: Trend Micro Deep Security, Trellix</span>
           </div>
         </div>
 
@@ -804,7 +804,7 @@
             <span class="k-tag">APT Detection</span>
             <span class="k-tag">Kernel EDR</span>
             <span class="k-tag">NVIDIA CUDA Shield</span>
-            <span class="k-tag">Memory Protection</span>
+            <span class="k-tag" style="color: #93c5fd; border-color: rgba(59, 130, 246, 0.4);">Аналоги: CrowdStrike Falcon, SentinelOne</span>
           </div>
         </div>
 
@@ -823,8 +823,59 @@
             <span class="k-tag">Edge WAF</span>
             <span class="k-tag">mTLS Inspection</span>
             <span class="k-tag">Anti-DDoS</span>
+            <span class="k-tag" style="color: #93c5fd; border-color: rgba(59, 130, 246, 0.4);">Аналоги: Cloudflare WAF, F5 Advanced WAF</span>
           </div>
         </div>
+      </div>
+
+      <!-- Таблица соответствия международным аналогам -->
+      <div style="margin-top: 32px; background: var(--bg-card); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div style="padding: 16px 20px; background: rgba(16, 185, 129, 0.08); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <strong style="color: #fff; font-size: 14px; font-family: var(--font-display);">🌍 Матрица сопоставления с международными аналогами (Global Tier-1)</strong>
+          <span class="badge badge-green" style="font-size: 10px;">Vendor-Agnostic Interface</span>
+        </div>
+        <table class="threat-table">
+          <thead>
+            <tr>
+              <th style="width: 200px;">Класс средств защиты</th>
+              <th style="width: 220px;">Внедряемый компонент</th>
+              <th>Международные аналоги (Global Tier-1)</th>
+              <th style="width: 240px;">Стандарт интеграции</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>SIEM &amp; Security Analytics</strong></td>
+              <td><span style="color: #34d399; font-weight: 600;">KUMA SIEM</span></td>
+              <td><strong>Splunk Enterprise Security</strong>, <strong>IBM QRadar</strong>, <strong>Microsoft Sentinel</strong>, Elastic Security</td>
+              <td>Syslog TLS (порт 6514), ArcSight CEF, Kafka</td>
+            </tr>
+            <tr>
+              <td><strong>Container &amp; K8s Security</strong></td>
+              <td><span style="color: #34d399; font-weight: 600;">Container Security (KCS)</span></td>
+              <td><strong>Palo Alto Prisma Cloud</strong>, <strong>Aqua Security</strong>, <strong>Sysdig Secure</strong>, Wiz</td>
+              <td>OCI Image Scan, eBPF sensor, K8s Admission</td>
+            </tr>
+            <tr>
+              <td><strong>Storage &amp; RAG Anti-Malware</strong></td>
+              <td><span style="color: #34d399; font-weight: 600;">Security for Storage (KSS)</span></td>
+              <td><strong>Trend Micro Deep Security / Cloud One</strong>, <strong>Trellix Storage Security</strong></td>
+              <td>ICAP Protocol, RPC Storage API</td>
+            </tr>
+            <tr>
+              <td><strong>EDR &amp; GPU Host Defense</strong></td>
+              <td><span style="color: #34d399; font-weight: 600;">KATA &amp; EDR Expert</span></td>
+              <td><strong>CrowdStrike Falcon</strong>, <strong>SentinelOne Singularity</strong>, <strong>MS Defender for Endpoint</strong></td>
+              <td>Linux Kernel Module, eBPF Telemetry</td>
+            </tr>
+            <tr>
+              <td><strong>Edge WAF &amp; Reverse Proxy</strong></td>
+              <td><span style="color: #34d399; font-weight: 600;">Web Traffic Security (KWTS)</span></td>
+              <td><strong>Cloudflare WAF / API Shield</strong>, <strong>F5 BIG-IP Advanced WAF</strong>, <strong>Akamai API Protector</strong></td>
+              <td>HTTP/2, WebSocket, ГОСТ TLS 1.3</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>

@@ -107,11 +107,11 @@
    - **Числовой аудитор** (сверка ставок, дат, сумм с исходными регламентами банка).
    - **Guided Decoding / JSON Schema** для строгой структуры ответов.
 
-4. **Эшелонированная защита и экосистема «Лаборатории Касперского»:**
-   - **Kaspersky KUMA (SIEM):** Централизованная корреляция событий безопасности в формате CEF (Syslog TLS 6514 / Kafka) и запуск плейбуков SOC банка.
-   - **Kaspersky Container Security (KCS):** Предотвращение уязвимостей цепочки поставок (Supply Chain) и защита среды исполнения Kubernetes.
-   - **Kaspersky Security for Storage (KSS):** Сканирование кредитных файлов и PDF/DOCX до парсинга в RAG-базу.
-   - **Kaspersky KATA & EDR Expert:** Защита физических хостов GPU и сетевого контура инференса от целевых атак.
+4. **Эшелонированная защита и стек средств компенсации рисков:**
+   - **KUMA (SIEM):** Централизованная корреляция событий безопасности в формате CEF (Syslog TLS 6514 / Kafka) и запуск плейбуков SOC банка (совместимо со Splunk ES / IBM QRadar).
+   - **Container Security (KCS):** Предотвращение уязвимостей цепочки поставок (Supply Chain) и защита среды исполнения Kubernetes (аналог Palo Alto Prisma Cloud / Aqua).
+   - **Security for Storage (KSS):** Сканирование кредитных файлов и PDF/DOCX до парсинга в RAG-базу (аналог Trend Micro / Trellix).
+   - **KATA & EDR Expert:** Защита физических хостов GPU и сетевого контура инференса от целевых атак (аналог CrowdStrike Falcon / SentinelOne).
 
 ---
 
