@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alfa AI Gateway — Архитектурный портал Enterprise LLM-прокси | Альфа-Банк</title>
+  <meta name="description" content="Интерактивный архитектурный портал корпоративного LLM-прокси для Альфа-Банка: сетевая топология, 6 детальных схем, Circuit Breaker, Zero-PII Vault, Guardrails и калькулятор GPU.">
+  <link rel="stylesheet" href="style.css?v=2.4">
+</head>
+<body>
+
+  <!-- =========================================================================
+       1. HEADER & TOP NAVIGATION
+       ========================================================================= -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#" class="brand">
+        <div class="brand-icon">🅰️</div>
+        <div class="brand-text">
+          <span class="brand-title">ALFA AI GATEWAY <span class="badge badge-red"><span class="badge-dot"></span>Enterprise v2.4</span></span>
+          <span class="brand-subtitle">Корпоративный LLM-прокси • On-Premise Air-Gap</span>
+        </div>
+      </a>
+
+      <nav class="header-nav">
+        <a href="#schematics" class="nav-link">Архитектурные схемы</a>
+        <a href="#calculator" class="nav-link">GPU Калькулятор</a>
+        <a href="#matrix" class="nav-link">Сравнение решений</a>
+        <a href="../demo/index.html" class="nav-link" style="color: #fca5a5;">Интерактивное Демо ↗</a>
+        <a href="../BANK_LLM_PROXY_ANALYSIS.pdf" target="_blank" class="nav-link" style="color: #93c5fd;">Executive PDF ↗</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="https://github.com/vk4arm/alfa_llm_hackaton" target="_blank" class="btn btn-secondary">
+          <span>GitHub</span> ↗
+        </a>
+        <a href="../demo/index.html" class="btn btn-primary">
+          <span>Запустить симулятор</span> ▶
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       2. HERO SECTION WITH KEY STATS
+       ========================================================================= -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-badge-wrap">
+        <span class="badge badge-green"><span class="badge-dot"></span> 100% Air-Gapped On-Premise</span>
+        <span class="badge badge-blue">Соответствие 152-ФЗ и 395-1</span>
+        <span class="badge badge-red">Qwen 2.5 & DeepSeek Support</span>
+      </div>
+
+      <h1 class="hero-title">
+        Корпоративный шлюз искусственного интеллекта для <span class="highlight-red">Альфа-Банка</span>
+      </h1>
+
+      <p class="hero-desc">
+        Отказоустойчивая, высокопроизводительная архитектура корпоративного LLM-прокси для интеграции открытых моделей (Qwen 2.5, DeepSeek) в изолированном банковском периметре. Полный контроль персональных данных (Zero-PII Vault), налог на задержку &lt; 20 мс, двухуровневые Guardrails и каскадный Circuit Breaker.
+      </p>
+
+      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <a href="#schematics" class="btn btn-primary" style="padding: 12px 24px; font-size: 14px;">
+          <span>⚡ Исследовать 6 архитектурных схем</span>
+        </a>
+        <a href="../demo/index.html" class="btn btn-accent" style="padding: 12px 24px; font-size: 14px;">
+          <span>🎮 Открыть живой симулятор отказов</span>
+        </a>
+        <a href="../BANK_LLM_PROXY_ANALYSIS.pdf" target="_blank" class="btn btn-secondary" style="padding: 12px 24px; font-size: 14px;">
+          <span>📑 Скачать аналитический отчет (PDF)</span>
+        </a>
+      </div>
+
+      <!-- Статистические карточки преимуществ -->
+      <div class="hero-stats-grid">
+        <div class="stat-card">
+          <div class="stat-value red">6</div>
+          <div class="stat-label">Детальных архитектурных схем</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Топология, Sequence, Circuit Breaker, Guardrails, Vault, QoS</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-value green">&lt; 20 мс</div>
+          <div class="stat-label">Proxy Tax (накладные расходы)</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Сквозная предобработка: Luhn + NER + Cache + Guardrails</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-value blue">100%</div>
+          <div class="stat-label">Защита банковской тайны (395-1)</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Zero-PII Vault: замена карт и паспортов на синтетические токены</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-value amber">99.99%</div>
+          <div class="stat-label">SLA доступности сервисов</div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Каскадная деградация: Qwen-72B ➔ 32B ➔ 14B без обрыва сессии</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       3. INTERACTIVE SCHEMATICS HUB (6 СХЕМ)
+       ========================================================================= -->
+  <section class="schematics-section" id="schematics">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="section-tag">Архитектурный центр</span>
+          <h2 class="section-title">Интерактивные схемы и компоненты шлюза</h2>
+          <p class="section-desc">
+            Переключайтесь между 6 ключевыми разрезами архитектуры. Нажмите на любой компонент схемы для вызова глубокого инспектора параметров, SLA, оборудования и стандартов ИБ.
+          </p>
+        </div>
+        <div>
+          <button id="btnSimulateSignal" class="btn btn-accent">
+            <span>▶️ Смоделировать сигнал</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Навигация по 6 схемам -->
+      <div class="schematic-nav">
+        <button class="schema-tab-btn active" data-schema="topology">
+          <span class="tab-num">1</span>
+          <span>Топология сети и DMZ</span>
+        </button>
+        <button class="schema-tab-btn" data-schema="sequence">
+          <span class="tab-num">2</span>
+          <span>Sequence Flow (E2E)</span>
+        </button>
+        <button class="schema-tab-btn" data-schema="circuit-breaker">
+          <span class="tab-num">3</span>
+          <span>Circuit Breaker &amp; Failover</span>
+        </button>
+        <button class="schema-tab-btn" data-schema="guardrails">
+          <span class="tab-num">4</span>
+          <span>Guardrails &amp; Анти-галлюцинации</span>
+        </button>
+        <button class="schema-tab-btn" data-schema="vault">
+          <span class="tab-num">5</span>
+          <span>Zero-PII Vault (152-ФЗ)</span>
+        </button>
+        <button class="schema-tab-btn" data-schema="qos">
+          <span class="tab-num">6</span>
+          <span>Fair Priority Queues (QoS)</span>
+        </button>
+      </div>
+
+      <!-- Вьювер схемы -->
+      <div class="schema-viewer-card">
+        <div class="schema-toolbar">
+          <div class="schema-meta">
+            <span class="badge badge-red" id="activeSchemaTag">СХЕМА 1: СЕТЕВОЙ ПЕРИМЕТР</span>
+            <span class="schema-title-active" id="activeSchemaTitle">Топология контуров банка и сегментация безопасности</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <span style="font-size: 12px; color: var(--text-muted); display: none; @media(min-width: 900px){display:inline;}" id="activeSchemaDesc">
+              Строгое разделение: клиентский ДМЗ, защищенный шлюз и изолированный On-Prem GPU-кластер vLLM.
+            </span>
+            <div class="schema-view-toggle">
+              <button class="view-btn active" data-view="svg">Векторная схема</button>
+              <button class="view-btn" data-view="mermaid">Mermaid.js</button>
+              <button class="view-btn" data-view="specs">Спецификация</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Холст для отрисовки -->
+        <div class="schema-stage" id="schemaStage">
+          <!-- Сюда динамически рендерится SVG / Mermaid / Specs через app.js -->
+        </div>
+
+        <!-- Выдвижной инспектор узла (Side Drawer) -->
+        <div class="node-inspector-drawer" id="nodeDrawer">
+          <div class="drawer-header">
+            <div class="drawer-title-wrap">
+              <span class="drawer-icon" id="drawerIcon">🛡️</span>
+              <div>
+                <h3 class="drawer-title" id="drawerTitle">Компонент</h3>
+                <p class="drawer-subtitle" id="drawerSub">Подсистема</p>
+              </div>
+            </div>
+            <button class="drawer-close" id="btnCloseDrawer">&times;</button>
+          </div>
+
+          <div class="drawer-section">
+            <h4 class="drawer-section-title">Назначение и алгоритм работы</h4>
+            <p class="drawer-text" id="drawerDesc">Описание узла...</p>
+          </div>
+
+          <div class="drawer-section">
+            <h4 class="drawer-section-title">Технические метрики и параметры</h4>
+            <table class="drawer-metrics-table">
+              <tr>
+                <td>SLA и Пропускная способность</td>
+                <td id="drawerSla">-</td>
+              </tr>
+              <tr>
+                <td>Задержка обработки (Tax)</td>
+                <td id="drawerTax" style="color: #34d399;">-</td>
+              </tr>
+              <tr>
+                <td>Оборудование и рантайм</td>
+                <td id="drawerHw">-</td>
+              </tr>
+              <tr>
+                <td>Безопасность и ГОСТ / ФЗ</td>
+                <td id="drawerSec" style="color: #60a5fa;">-</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="drawer-section" style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+            <div style="display: flex; gap: 8px;">
+              <a href="../demo/index.html" class="btn btn-primary" style="flex: 1; font-size: 12px; padding: 8px;">
+                Проверить в симуляторе ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       4. GPU SIZING & ECONOMICS CALCULATOR
+       ========================================================================= -->
+  <section class="calculator-section" id="calculator">
+    <div class="container">
+      <div class="section-title-wrap">
+        <span class="section-tag">Экономика и сайзинг оборудования</span>
+        <h2 class="section-title">Интерактивный сайзинг GPU кластера и TCO</h2>
+        <p class="section-desc">
+          Рассчитайте потребность в ускорителях NVIDIA A100/H100, объем VRAM и финансовую экономию бюджета банка при использовании семантического кэша и каскадирования моделей.
+        </p>
+      </div>
+
+      <div class="calc-grid">
+        <!-- Левая колонка: ползунки параметров -->
+        <div class="calc-controls-card">
+          <h3 style="font-family: var(--font-display); font-size: 18px; margin-bottom: 24px; color: #fff;">
+            ⚙️ Параметры рабочей нагрузки банка
+          </h3>
+
+          <div class="control-group">
+            <div class="control-label-wrap">
+              <label class="control-label" for="sliderRps">Пиковая входящая нагрузка (RPS):</label>
+              <span class="control-val-badge" id="valRpsBadge">100 RPS</span>
+            </div>
+            <input type="range" class="calc-slider" id="sliderRps" min="10" max="500" step="10" value="100">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-top: 4px;">
+              <span>10 RPS (Пилот)</span>
+              <span>250 RPS (Стандарт)</span>
+              <span>500 RPS (All-Bank Peak)</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-wrap">
+              <label class="control-label" for="sliderContext">Средний размер контекста (Промпт + Ответ):</label>
+              <span class="control-val-badge" id="valContextBadge">2 048 токенов</span>
+            </div>
+            <input type="range" class="calc-slider" id="sliderContext" min="512" max="16384" step="512" value="2048">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-top: 4px;">
+              <span>512 (Короткий чат)</span>
+              <span>4 096 (RAG Регламент)</span>
+              <span>16 384 (Анализ документов)</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-wrap">
+              <label class="control-label" for="sliderCache">Эффективность семантического кэша:</label>
+              <span class="control-val-badge" id="valCacheBadge">30% Cache Hit</span>
+            </div>
+            <input type="range" class="calc-slider" id="sliderCache" min="0" max="70" step="5" value="30">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-top: 4px;">
+              <span>0% (Без кэша)</span>
+              <span>30% (Базовый FAQ)</span>
+              <span>70% (Агрессивный кэш)</span>
+            </div>
+          </div>
+
+          <div style="background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-medium); border-radius: var(--radius-md); padding: 16px; margin-top: 24px;">
+            <span style="font-size: 12px; color: var(--text-muted); line-height: 1.5; display: block;">
+              💡 <strong>Примечание:</strong> Расчет базируется на vLLM с непрерывным батчингом (Continuous Batching) и PagedAttention на моделях Qwen-2.5-72B (4-way Tensor Parallelism) и Qwen-2.5-32B в режиме отказоустойчивости N+1.
+            </span>
+          </div>
+        </div>
+
+        <!-- Правая колонка: результаты расчета -->
+        <div class="calc-results-card">
+          <div class="results-header">
+            <span>📊</span>
+            <span>Расчетная спецификация GPU-кластера</span>
+          </div>
+
+          <div class="calc-kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-val green" id="kpiGpuCount">8 x A100</div>
+              <div class="kpi-label">Требуемое число GPU (80GB)</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-val blue" id="kpiVram">640 GB</div>
+              <div class="kpi-label">Суммарный пул видеопамяти</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-val amber" id="kpiTokensSec">21 400 tok/s</div>
+              <div class="kpi-label">Генерация токенов на кластере</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-val green" id="kpiTtft">140 мс</div>
+              <div class="kpi-label">Расчетный TTFT (P95)</div>
+            </div>
+          </div>
+
+          <div class="savings-highlight-box">
+            <div class="savings-title">💰 Годовая экономия TCO банка:</div>
+            <div class="savings-amount" id="kpiSavingsRub">~ 18.4 млн ₽</div>
+            <div class="savings-desc">
+              За счет отсечения дублирующих запросов семантическим кэшем Qdrant и каскадного переключения на Qwen-32B вместо постоянной утилизации тяжелых нод 72B.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       5. COMPETITIVE COMPARISON MATRIX
+       ========================================================================= -->
+  <section class="matrix-section" id="matrix">
+    <div class="container">
+      <div class="section-title-wrap">
+        <span class="section-tag">Архитектурный бенчмарк</span>
+        <h2 class="section-title">Сравнение с альтернативными решениями</h2>
+        <p class="section-desc">
+          Сопоставление проектируемого решения Alfa AI Gateway с облачными LLM-шлюзами, открытыми прокси без доработок и прямым обращением к vLLM.
+        </p>
+      </div>
+
+      <!-- Фильтры матрицы -->
+      <div class="matrix-filters">
+        <button class="matrix-filter-btn active" data-cat="all">Все критерии</button>
+        <button class="matrix-filter-btn" data-cat="security">Безопасность и ПДн</button>
+        <button class="matrix-filter-btn" data-cat="resilience">Отказоустойчивость</button>
+        <button class="matrix-filter-btn" data-cat="compliance">Российский комплаенс</button>
+      </div>
+
+      <!-- Таблица матрицы -->
+      <div class="matrix-table-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th style="width: 28%;">Критерий оценки</th>
+              <th class="alfa-col" style="width: 24%;">Alfa AI Gateway (Проект)</th>
+              <th style="width: 16%;">LiteLLM Proxy (Open-Source)</th>
+              <th style="width: 16%;">Portkey / Cloud Gateway</th>
+              <th style="width: 16%;">Прямой vLLM (Без шлюза)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-category="compliance">
+              <td><strong>Соответствие 152-ФЗ и 395-1 «О банковской тайне»</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ Полное (Zero-PII Vault)</span></td>
+              <td><span class="check-partial">⚠️ Базовый Presidio (Regex)</span></td>
+              <td><span class="check-no">❌ Облачный контур (Утечка)</span></td>
+              <td><span class="check-no">❌ Нет маскирования</span></td>
+            </tr>
+            <tr data-category="compliance">
+              <td><strong>Автономная работа в контуре Air-Gap (Без интернета)</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ 100% On-Premise</span></td>
+              <td><span class="check-yes">✅ Да (Локальный Docker)</span></td>
+              <td><span class="check-no">❌ Требует облачный SaaS</span></td>
+              <td><span class="check-yes">✅ Да</span></td>
+            </tr>
+            <tr data-category="compliance">
+              <td><strong>ГОСТ TLS 1.3 и криптографическая защита</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ Встроенная поддержка mTLS</span></td>
+              <td><span class="check-partial">⚠️ Только стандартный OpenSSL</span></td>
+              <td><span class="check-no">❌ Зарубежные CA-сертификаты</span></td>
+              <td><span class="check-no">❌ Только HTTP/1.1</span></td>
+            </tr>
+            <tr data-category="security">
+              <td><strong>Специфичные Guardrails для русского языка (< 10 мс)</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ RuBERT-Tiny + RuJailbreak</span></td>
+              <td><span class="check-partial">⚠️ Llama Guard (Англ. язык)</span></td>
+              <td><span class="check-partial">⚠️ Guardrails AI (Высокий лаг)</span></td>
+              <td><span class="check-no">❌ Отсутствуют</span></td>
+            </tr>
+            <tr data-category="security">
+              <td><strong>NLI Анти-галлюцинатор для финансовых регламентов</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ Cross-Encoder (mDeBERTa-v3)</span></td>
+              <td><span class="check-no">❌ Нет верификации фактов</span></td>
+              <td><span class="check-partial">⚠️ Промпт-эвалюация (Дорого)</span></td>
+              <td><span class="check-no">❌ Модель галлюцинирует</span></td>
+            </tr>
+            <tr data-category="resilience">
+              <td><strong>Circuit Breaker с каскадной деградацией (72B ➔ 32B ➔ 14B)</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ Hystrix Machine State</span></td>
+              <td><span class="check-partial">⚠️ Простой Fallback по таймауту</span></td>
+              <td><span class="check-partial">⚠️ Балансировка по весам</span></td>
+              <td><span class="check-no">❌ Падение с OOM / 503</span></td>
+            </tr>
+            <tr data-category="resilience">
+              <td><strong>Приоритизация очередей (Weighted Fair Queuing QoS)</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ P0 (Мобильный) / P1 / P2</span></td>
+              <td><span class="check-no">❌ Простой FIFO буфер</span></td>
+              <td><span class="check-partial">⚠️ Ограничение RPM/TPM</span></td>
+              <td><span class="check-no">❌ Очередь vLLM зависает</span></td>
+            </tr>
+            <tr data-category="resilience">
+              <td><strong>Семантический кэш с удалением ПДн из векторов</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ Qdrant + Redis (Обезличен)</span></td>
+              <td><span class="check-partial">⚠️ Redis Cache (Сырой текст)</span></td>
+              <td><span class="check-partial">⚠️ Внешний кэш в облаке</span></td>
+              <td><span class="check-no">❌ Нет кэширования</span></td>
+            </tr>
+            <tr data-category="security">
+              <td><strong>Неизменяемый аудит ИБ (WORM в Apache Kafka)</strong></td>
+              <td class="alfa-col"><span class="check-yes">✅ Полнотекстовый WORM Trail</span></td>
+              <td><span class="check-partial">⚠️ Логи в PostgreSQL/OpenTelemetry</span></td>
+              <td><span class="check-no">❌ Хранение логов у вендора</span></td>
+              <td><span class="check-no">❌ Только stdout логи</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       6. FOOTER
+       ========================================================================= -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+          <span style="font-size: 18px;">🅰️</span>
+          <strong style="color: #fff; font-family: var(--font-display);">Alfa AI Gateway Architecture Portal</strong>
+        </div>
+        <p style="font-size: 12px; color: var(--text-dim); max-width: 500px;">
+          Проект специализированного шлюза генеративного ИИ в рамках архитектурного контура Альфа-Банка. Безопасность, автономность, соответствие стандартам Банка России (683-П) и защита клиентских данных.
+        </p>
+      </div>
+
+      <div class="footer-links">
+        <a href="#schematics" class="footer-link">Схемы</a>
+        <a href="#calculator" class="footer-link">GPU Сайзинг</a>
+        <a href="#matrix" class="footer-link">Бенчмарк</a>
+        <a href="../demo/index.html" class="footer-link" style="color: #f87171;">Интерактивное Демо ↗</a>
+        <a href="../BANK_LLM_PROXY_ANALYSIS.pdf" target="_blank" class="footer-link" style="color: #60a5fa;">PDF-отчет ↗</a>
+        <a href="https://github.com/vk4arm/alfa_llm_hackaton" target="_blank" class="footer-link">GitHub ↗</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Исполняемый движок интерактивных схем -->
+  <script src="app.js?v=2.4"></script>
+</body>
+</html>
