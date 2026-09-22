@@ -79,7 +79,7 @@
 * Банковские сценарии (Суфлер контакт-центра, RAG по кредитным регламентам, B2B андеррайтинг, Code Copilot).
 * Сценарий победной 3-минутной live-демонстрации жюри на хакатоне.
 
-### 3. 🛡️ [Модель угроз и интеграция с «Лабораторией Касперского» (docs/THREAT_MODEL_AND_KASPERSKY_INTEGRATION.md)](docs/THREAT_MODEL_AND_KASPERSKY_INTEGRATION.md)
+### 3. 🛡️ [Модель угроз и компенсация рисков (docs/THREAT_MODEL_AND_KASPERSKY_INTEGRATION.md)](docs/THREAT_MODEL_AND_KASPERSKY_INTEGRATION.md)
 **Модель угроз по OWASP Top 10 for LLM (2025) и эшелонированная защита:**
 * **Модель нарушителя** (Внешний Н1, внутренний Н2, целевая APT-группировка Н3).
 * **Матрица угроз ИИ** (TH-01 Jailbreak, TH-02 Sensitive Data Leakage, TH-03 RAG Poisoning, TH-04 Hallucination, TH-05 GPU DoS, TH-06 Supply Chain, TH-07 System Prompt Leakage, TH-08 Lateral Movement).

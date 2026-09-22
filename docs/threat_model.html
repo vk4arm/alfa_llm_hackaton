@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Модель угроз безопасности и интеграция с Лабораторией Касперского | Alfa AI Gateway</title>
-  <meta name="description" content="Интерактивная модель угроз для корпоративного LLM-шлюза Alfa AI Gateway: OWASP Top 10 for LLM (2025), ФСТЭК России, Банк России 683-П/716-П, интеграция с Kaspersky KUMA SIEM, KCS, KSS, KATA/EDR и симулятор CEF-событий.">
+  <title>Модель угроз безопасности и компенсация рисков | Alfa AI Gateway</title>
+  <meta name="description" content="Интерактивная модель угроз для корпоративного LLM-шлюза Alfa AI Gateway: OWASP Top 10 for LLM (2025), ФСТЭК России, Банк России 683-П/716-П, компенсация угроз, средства защиты KUMA SIEM, KCS, KSS, KATA/EDR и симулятор CEF-событий.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -486,7 +486,7 @@
         <div class="brand-icon">🅰️</div>
         <div>
           <div class="brand-title">ALFA AI GATEWAY <span class="badge badge-green">Модель угроз</span></div>
-          <div class="brand-sub">Информационная безопасность &bull; Экосистема Касперского</div>
+          <div class="brand-sub">Информационная безопасность &bull; Компенсация угроз</div>
         </div>
       </a>
 
@@ -494,7 +494,7 @@
         <a href="#attackers" class="nav-link">Нарушители (Н1–Н3)</a>
         <a href="#matrix" class="nav-link">Матрица угроз</a>
         <a href="#architecture" class="nav-link">Архитектура защиты</a>
-        <a href="#kaspersky" class="nav-link">Стек Касперского</a>
+        <a href="#kaspersky" class="nav-link">Стек защиты</a>
         <a href="#cef-sim" class="nav-link">CEF Симулятор</a>
         <a href="../html/index.html" class="nav-link" style="color: #60a5fa;">Портал схем ↗</a>
         <a href="../demo/index.html" class="nav-link" style="color: #f87171;">Live Демо ↗</a>
@@ -593,7 +593,7 @@
       <span class="sec-tag" style="color: #f87171;">Раздел 2 &bull; Матрица угроз и эшелоны защиты</span>
       <h2 class="sec-title">Матрица угроз информационной безопасности ИИ</h2>
       <p class="sec-desc">
-        Каждая угроза сопоставлена с вектором атаки, финансовыми рисками банка, внутриплатформенным барьером прокси и модулем интеграции со средствами защиты «Лаборатории Касперского».
+        Каждая угроза сопоставлена с вектором атаки, финансовыми рисками банка, внутриплатформенным барьером прокси и эшелонами компенсации угрозы.
       </p>
 
       <div class="matrix-filters">
@@ -611,7 +611,7 @@
               <th style="width: 200px;">Категория угрозы</th>
               <th>Вектор атаки и риски для банка</th>
               <th style="width: 220px;">Эшелон в шлюзе</th>
-              <th style="width: 240px;">Защита «Лаборатории Касперского»</th>
+              <th style="width: 240px;">Компенсация угрозы</th>
             </tr>
           </thead>
           <tbody id="threatTableBody">
@@ -628,7 +628,7 @@
   <section class="section-wrap" id="architecture">
     <div class="container">
       <span class="sec-tag" style="color: #34d399;">Раздел 3 &bull; Архитектурная топология ИБ</span>
-      <h2 class="sec-title">Эшелонированная архитектура интеграции с продуктами Касперского</h2>
+      <h2 class="sec-title">Эшелонированная архитектура компенсации угроз</h2>
       <p class="sec-desc">
         Сквозная сегментация трафика: от клиентского DMZ до изолированного GPU-контура vLLM с непрерывным экспортом событий в Kaspersky KUMA SIEM.
       </p>
@@ -925,7 +925,7 @@ CEF:0|AlfaBank|AlfaAIGateway|2.4.0|SEC-001|PromptInjectionBlocked|8|src=10.14.22
         <a href="#attackers">Нарушители</a>
         <a href="#matrix">Матрица угроз</a>
         <a href="#architecture">Архитектура</a>
-        <a href="#kaspersky">Касперский</a>
+        <a href="#kaspersky">Стек защиты</a>
         <a href="#cef-sim">CEF Симулятор</a>
         <a href="../html/index.html" style="color: #60a5fa;">Портал схем ↗</a>
         <a href="../demo/index.html" style="color: #f87171;">Интерактивное Демо ↗</a>
