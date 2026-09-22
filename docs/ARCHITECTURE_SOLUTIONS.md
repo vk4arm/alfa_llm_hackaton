@@ -355,7 +355,7 @@ flowchart LR
     subgraph STAGE_LLM[" 🧠 ЭТАП 2: Инференс "]
         direction TB
         CleanPrompt --> ModelGen["vLLM Генерация<br/>(Qwen-2.5 on-prem)"]
-        ModelGen --> RawAnswer["Сгенерированный текст"]
+        ModelGen --> RawAnswer["Ответ модели"]
     end
 
     subgraph STAGE_OUT[" ⚖️ ЭТАП 3: Выходной контроль и факт-чекинг "]

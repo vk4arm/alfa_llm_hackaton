@@ -1000,7 +1000,7 @@ function initAlfaApp() {
         nliVerdictBadge.textContent = 'ГАЛЛЮЦИНАЦИЯ (Contradiction)';
         nliVerdictBadge.style.background = '#ef4444';
         nliScoreText.textContent = 'Faithfulness Score: 0.12';
-        nliVerdictDesc.textContent = 'Обнаружено искажение ставки вклада: в сгенерированном ответе указано 24.5%, тогда как в официальном регламенте — 19.2%. Шлюз заблокирует выдачу и подставит утвержденный текст.';
+        nliVerdictDesc.textContent = 'Обнаружено искажение ставки вклада: в ответе модели указано 24.5%, тогда как в официальном регламенте — 19.2%. Шлюз заблокирует выдачу и подставит утвержденный текст.';
         addLog('NLI-AUDIT', 'NLI Cross-Encoder: обнаружено расхождение процентной ставки (24.5% vs 19.2%).', 'sec');
       } else {
         nliVerdictBadge.textContent = 'ДОСТОВЕРНО (Entailment)';

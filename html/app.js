@@ -152,7 +152,7 @@ function initPortal() {
       tax: '12.4 мс',
       hw: 'ONNX Runtime (mDeBERTa-v3 / RuBERT-NLI)',
       sec: 'Контроль искажения ставок, лимитов и тарифов',
-      desc: 'Оценивает логическое следование (Entailment vs Contradiction) между сгенерированным текстом и официальным RAG-регламентом банка.'
+      desc: 'Оценивает логическое следование (Entailment vs Contradiction) между ответом модели и официальным RAG-регламентом банка.'
     },
     'kafka-siem': {
       title: 'Apache Kafka SIEM WORM Trail',
@@ -517,7 +517,7 @@ function initPortal() {
             <path d="M 320 320 L 920 320" stroke="#8b5cf6" stroke-width="2"/>
             <text x="510" y="310" class="node-text-sub">5. vLLM Streaming Инференс (Continuous Batching)</text>
             <path d="M 920 370 L 320 370" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4 4"/>
-            <text x="510" y="390" class="node-text-sub">6. Поток сгенерированных токенов</text>
+            <text x="510" y="390" class="node-text-sub">6. Поток токенов ответа</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('nli-fact-guard')">
