@@ -140,25 +140,25 @@
               </defs>
 
               <!-- Связи от клиентов к Ingress -->
-              <path id="pathClientToIngress" d="M 210 115 C 235 115, 235 195, 260 195" class="topo-wire" />
-              <path id="pathClient2ToIngress" d="M 210 230 C 235 230, 235 195, 260 195" class="topo-wire" />
-              <path id="pathClient3ToIngress" d="M 210 345 C 235 345, 235 195, 260 195" class="topo-wire" />
+              <path id="pathClientToIngress" d="M 225 115 C 240 115, 240 195, 250 195" class="topo-wire" />
+              <path id="pathClient2ToIngress" d="M 225 230 C 240 230, 240 195, 250 195" class="topo-wire" />
+              <path id="pathClient3ToIngress" d="M 225 345 C 240 345, 240 195, 250 195" class="topo-wire" />
 
               <!-- Конвейер шлюза -->
               <path id="pathIngressToVault" d="M 390 195 L 420 195" class="topo-wire" />
-              <path id="pathVaultToGuard" d="M 560 195 L 590 195" class="topo-wire" />
-              <path id="pathGuardToCache" d="M 730 195 L 760 195" class="topo-wire" />
-              <path id="pathCacheToRouter" d="M 900 195 L 930 195" class="topo-wire" />
+              <path id="pathVaultToGuard" d="M 570 195 L 600 195" class="topo-wire" />
+              <path id="pathGuardToCache" d="M 760 195 L 790 195" class="topo-wire" />
+              <path id="pathCacheToRouter" d="M 940 195 L 970 195" class="topo-wire" />
 
               <!-- Каскад к 3 моделям LLM (Красивый Fan-out) -->
-              <path id="pathRouterToTier1" d="M 1070 195 C 1090 195, 1090 95, 1110 95" class="topo-wire wire-tier1" />
-              <path id="pathRouterToTier2" d="M 1070 195 C 1090 195, 1090 215, 1110 215" class="topo-wire wire-tier2" />
-              <path id="pathRouterToTier3" d="M 1070 195 C 1090 195, 1090 335, 1110 335" class="topo-wire wire-tier3" />
+              <path id="pathRouterToTier1" d="M 1115 195 C 1130 195, 1130 95, 1145 95" class="topo-wire wire-tier1" />
+              <path id="pathRouterToTier2" d="M 1115 195 L 1145 195" class="topo-wire wire-tier2" />
+              <path id="pathRouterToTier3" d="M 1115 195 C 1130 195, 1130 335, 1145 335" class="topo-wire wire-tier3" />
 
               <!-- Вертикальные связи с хранилищами и шиной SIEM -->
-              <path id="pathVaultToRedis" d="M 490 230 L 490 460" class="topo-wire wire-storage" />
-              <path id="pathGatewayToKafka" d="M 660 230 L 660 460" class="topo-wire wire-storage" />
-              <path id="pathCacheToVector" d="M 830 230 L 830 460" class="topo-wire wire-storage" />
+              <path id="pathVaultToRedis" d="M 495 230 L 495 460" class="topo-wire wire-storage" />
+              <path id="pathGatewayToKafka" d="M 680 230 L 680 460" class="topo-wire wire-storage" />
+              <path id="pathCacheToVector" d="M 865 230 L 865 460" class="topo-wire wire-storage" />
 
               <!-- Анимированные импульсы пакетов -->
               <g id="packetLayer"></g>
@@ -169,35 +169,35 @@
               
               <!-- ЗОНА 1: КЛИЕНТЫ -->
               <div class="topo-zone zone-clients">
-                <span class="zone-label" style="top: 25px; left: 40px;">ДМЗ / КЛИЕНТСКИЕ СИСТЕМЫ</span>
-                <div class="node-card" data-node="client-mobile" style="top: 75px; left: 40px; width: 170px;">
+                <span class="zone-label" style="top: 25px; left: 35px;">ДМЗ / КЛИЕНТСКИЕ СИСТЕМЫ</span>
+                <div class="node-card" data-node="client-mobile" style="top: 75px; left: 35px; width: 190px;">
                   <div class="node-icon">📱</div>
                   <div class="node-body">
                     <span class="node-name">Мобильный Банк</span>
-                    <span class="node-status text-green">VIP (P0) / Realtime</span>
+                    <span class="node-status text-green">VIP (P0) • Realtime</span>
                   </div>
                 </div>
-                <div class="node-card" data-node="client-callcenter" style="top: 190px; left: 40px; width: 170px;">
+                <div class="node-card" data-node="client-callcenter" style="top: 190px; left: 35px; width: 190px;">
                   <div class="node-icon">🎧</div>
                   <div class="node-body">
                     <span class="node-name">АРМ Оператора</span>
-                    <span class="node-status text-blue">High (P0) / Суфлер</span>
+                    <span class="node-status text-blue">High (P0) • Суфлер</span>
                   </div>
                 </div>
-                <div class="node-card" data-node="client-crm" style="top: 305px; left: 40px; width: 170px;">
+                <div class="node-card" data-node="client-crm" style="top: 305px; left: 35px; width: 190px;">
                   <div class="node-icon">🏢</div>
                   <div class="node-body">
-                    <span class="node-name">CRM & Бэк-офис</span>
-                    <span class="node-status text-purple">Medium (P1)</span>
+                    <span class="node-name">CRM &amp; Бэк-офис</span>
+                    <span class="node-status text-purple">Medium (P1) • АС</span>
                   </div>
                 </div>
               </div>
 
               <!-- ЗОНА 2: ПЕРИМЕТР ШЛЮЗА -->
               <div class="topo-zone zone-gateway">
-                <span class="zone-label" style="top: 80px; left: 260px;">ПЕРИМЕТР БЕЗОПАСНОСТИ & ШЛЮЗ (ALFA AI GATEWAY CORE)</span>
+                <span class="zone-label" style="top: 80px; left: 250px;">ПЕРИМЕТР БЕЗОПАСНОСТИ &amp; ШЛЮЗ (ALFA AI GATEWAY CORE)</span>
                 
-                <div class="node-card" data-node="ingress" style="top: 160px; left: 260px; width: 130px;">
+                <div class="node-card" data-node="ingress" style="top: 160px; left: 250px; width: 140px;">
                   <div class="node-icon">🛡️</div>
                   <div class="node-body">
                     <span class="node-name">API Ingress</span>
@@ -205,7 +205,7 @@
                   </div>
                 </div>
 
-                <div class="node-card" data-node="vault" style="top: 160px; left: 420px; width: 140px;">
+                <div class="node-card" data-node="vault" style="top: 160px; left: 420px; width: 150px;">
                   <div class="node-icon">🔒</div>
                   <div class="node-body">
                     <span class="node-name">Zero-PII Vault</span>
@@ -213,15 +213,15 @@
                   </div>
                 </div>
 
-                <div class="node-card" data-node="guardrails" style="top: 160px; left: 590px; width: 140px;">
+                <div class="node-card" data-node="guardrails" style="top: 160px; left: 600px; width: 160px;">
                   <div class="node-icon">⚔️</div>
                   <div class="node-body">
                     <span class="node-name">Ru-Guardrails</span>
-                    <span class="node-status text-cyan">Toxicity & Jailbreak</span>
+                    <span class="node-status text-cyan">Toxicity &amp; Jailbreak</span>
                   </div>
                 </div>
 
-                <div class="node-card" data-node="cache" style="top: 160px; left: 760px; width: 140px;">
+                <div class="node-card" data-node="cache" style="top: 160px; left: 790px; width: 150px;">
                   <div class="node-icon">⚡</div>
                   <div class="node-body">
                     <span class="node-name">Semantic Cache</span>
@@ -229,7 +229,7 @@
                   </div>
                 </div>
 
-                <div class="node-card" data-node="router" style="top: 160px; left: 930px; width: 140px;">
+                <div class="node-card" data-node="router" style="top: 160px; left: 970px; width: 145px;">
                   <div class="node-icon">🔀</div>
                   <div class="node-body">
                     <span class="node-name">Circuit Router</span>
@@ -241,21 +241,21 @@
               <!-- ЗОНА 3: ИНФРАСТРУКТУРА ХРАНЕНИЯ -->
               <div class="topo-zone zone-infra">
                 <span class="zone-label" style="top: 420px; left: 420px;">ЭФЕМЕРНЫЕ ХРАНИЛИЩА &amp; KASPERSKY SIEM</span>
-                <div class="node-card small" data-node="redis" style="top: 460px; left: 420px; width: 140px;">
+                <div class="node-card small" data-node="redis" style="top: 460px; left: 420px; width: 150px;">
                   <div class="node-icon">🗄️</div>
                   <div class="node-body">
                     <span class="node-name">Redis Vault Map</span>
                     <span class="node-status">TTL: 300s</span>
                   </div>
                 </div>
-                <div class="node-card small" data-node="kafka" style="top: 460px; left: 590px; width: 155px;">
+                <div class="node-card small" data-node="kafka" style="top: 460px; left: 600px; width: 160px;">
                   <div class="node-icon">🛡️</div>
                   <div class="node-body">
                     <span class="node-name">Kaspersky KUMA</span>
                     <span class="node-status">CEF WORM Log</span>
                   </div>
                 </div>
-                <div class="node-card small" data-node="vectordb" style="top: 460px; left: 760px; width: 140px;">
+                <div class="node-card small" data-node="vectordb" style="top: 460px; left: 790px; width: 150px;">
                   <div class="node-icon">🔍</div>
                   <div class="node-body">
                     <span class="node-name">Vector DB</span>

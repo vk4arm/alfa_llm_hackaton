@@ -356,394 +356,401 @@ function initPortal() {
 
     if (schemaKey === 'topology') {
       svgHtml = `
-        <svg class="schema-svg-canvas" viewBox="0 0 1200 580" id="currentSvg">
+        <svg class="schema-svg-canvas" viewBox="0 0 1340 580" id="currentSvg">
           <defs>
             <filter id="glowBlue"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <filter id="glowRed"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <filter id="glowGreen"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
           </defs>
 
-          <!-- Связующие провода -->
-          <path d="M 170 120 C 230 120, 230 220, 290 220" class="wire wire-blue"/>
-          <path d="M 170 220 L 290 220" class="wire wire-blue"/>
-          <path d="M 170 320 C 230 320, 230 220, 290 220" class="wire wire-blue"/>
+          <!-- Связующие провода от клиентов к WAF -->
+          <path d="M 210 120 C 255 120, 255 220, 300 220" class="wire wire-blue"/>
+          <path d="M 210 220 L 300 220" class="wire wire-blue"/>
+          <path d="M 210 320 C 255 320, 255 220, 300 220" class="wire wire-blue"/>
 
-          <path d="M 430 220 L 480 220" class="wire wire-green"/>
-          <path d="M 620 220 L 670 220" class="wire wire-green"/>
-          <path d="M 810 220 L 860 220" class="wire wire-blue"/>
+          <!-- Конвейер шлюза -->
+          <path d="M 450 220 L 500 220" class="wire wire-green"/>
+          <path d="M 655 220 L 705 220" class="wire wire-green"/>
+          <path d="M 860 220 L 910 220" class="wire wire-blue"/>
 
           <!-- Fan-out к GPU -->
-          <path d="M 980 220 C 1020 220, 1020 120, 1060 120" class="wire wire-green" id="wireTier1"/>
-          <path d="M 980 220 L 1060 220" class="wire wire-blue" id="wireTier2"/>
-          <path d="M 980 220 C 1020 220, 1020 320, 1060 320" class="wire wire-amber" id="wireTier3"/>
+          <path d="M 1055 220 C 1090 220, 1090 120, 1120 120" class="wire wire-green" id="wireTier1"/>
+          <path d="M 1055 220 L 1120 220" class="wire wire-blue" id="wireTier2"/>
+          <path d="M 1055 220 C 1090 220, 1090 320, 1120 320" class="wire wire-amber" id="wireTier3"/>
 
           <!-- Вертикальные хранилища -->
-          <path d="M 550 260 L 550 440" class="wire wire-amber"/>
-          <path d="M 740 260 L 740 440" class="wire wire-amber"/>
-          <path d="M 920 260 L 920 440" class="wire wire-red"/>
+          <path d="M 577 260 L 577 440" class="wire wire-amber"/>
+          <path d="M 782 260 L 782 440" class="wire wire-amber"/>
+          <path d="M 982 260 L 982 440" class="wire wire-red"/>
 
           <!-- Слой бегущих импульсов -->
           <g id="pulseLayer"></g>
 
           <!-- УЗЛЫ: КЛИЕНТЫ (ДМЗ) -->
           <g class="node-group" onclick="inspectNode('mobile-app')">
-            <rect x="30" y="85" width="140" height="70" class="node-box blue"/>
-            <text x="50" y="115" class="node-text-title">📱 Мобильный банк</text>
-            <text x="50" y="135" class="node-text-sub">Realtime P0 • iOS/Andr</text>
+            <rect x="25" y="85" width="185" height="70" class="node-box blue"/>
+            <text x="42" y="115" class="node-text-title">📱 Мобильный банк</text>
+            <text x="42" y="136" class="node-text-sub">Realtime P0 • iOS / Android</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('mobile-app')">
-            <rect x="30" y="185" width="140" height="70" class="node-box blue"/>
-            <text x="50" y="215" class="node-text-title">🎧 АРМ Оператора</text>
-            <text x="50" y="235" class="node-text-sub">Суфлер контакт-центра</text>
+            <rect x="25" y="185" width="185" height="70" class="node-box blue"/>
+            <text x="42" y="215" class="node-text-title">🎧 АРМ Оператора</text>
+            <text x="42" y="236" class="node-text-sub">Суфлер контакт-центра</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('mobile-app')">
-            <rect x="30" y="285" width="140" height="70" class="node-box blue"/>
-            <text x="50" y="315" class="node-text-title">🏢 CRM & Бэк-офис</text>
-            <text x="50" y="335" class="node-text-sub">Внутренние АС банка</text>
+            <rect x="25" y="285" width="185" height="70" class="node-box blue"/>
+            <text x="42" y="315" class="node-text-title">🏢 CRM &amp; Бэк-офис</text>
+            <text x="42" y="336" class="node-text-sub">Внутренние АС банка</text>
           </g>
 
           <!-- УЗЛЫ: ШЛЮЗ (КОНВЕЙЕР) -->
           <g class="node-group" onclick="inspectNode('waf-ingress')">
-            <rect x="290" y="180" width="140" height="80" class="node-box red"/>
-            <text x="310" y="215" class="node-text-title">🛡️ WAF & Ingress</text>
-            <text x="310" y="235" class="node-text-sub">mTLS • Rate Limit</text>
+            <rect x="300" y="180" width="150" height="80" class="node-box red"/>
+            <text x="318" y="215" class="node-text-title">🛡️ WAF &amp; Ingress</text>
+            <text x="318" y="236" class="node-text-sub">mTLS • Rate Limit</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <rect x="480" y="180" width="140" height="80" class="node-box green"/>
-            <text x="500" y="215" class="node-text-title">🔒 Zero-PII Vault</text>
-            <text x="500" y="235" class="node-text-sub">Luhn • Natasha NER</text>
+            <rect x="500" y="180" width="155" height="80" class="node-box green"/>
+            <text x="518" y="215" class="node-text-title">🔒 Zero-PII Vault</text>
+            <text x="518" y="236" class="node-text-sub">Luhn • Natasha NER</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('ru-guardrails-in')">
-            <rect x="670" y="180" width="140" height="80" class="node-box amber"/>
-            <text x="690" y="215" class="node-text-title">⚔️ Ru-Guardrails</text>
-            <text x="690" y="235" class="node-text-sub">Toxicity & Jailbreak</text>
+            <rect x="705" y="180" width="155" height="80" class="node-box amber"/>
+            <text x="723" y="215" class="node-text-title">⚔️ Ru-Guardrails</text>
+            <text x="723" y="236" class="node-text-sub">Toxicity &amp; Jailbreak</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('circuit-router')">
-            <rect x="860" y="180" width="120" height="80" class="node-box blue"/>
-            <text x="880" y="215" class="node-text-title">🔀 Router & CB</text>
-            <text x="880" y="235" class="node-text-sub">Circuit Breaker</text>
+            <rect x="910" y="180" width="145" height="80" class="node-box blue"/>
+            <text x="928" y="215" class="node-text-title">🔀 Router &amp; CB</text>
+            <text x="928" y="236" class="node-text-sub">Circuit Breaker</text>
           </g>
 
           <!-- УЗЛЫ: GPU КЛАСТЕР -->
           <g class="node-group" onclick="inspectNode('qwen-72b')">
-            <rect x="1040" y="85" width="150" height="70" class="node-box green"/>
-            <text x="1055" y="115" class="node-text-title">👑 Qwen-2.5-72B</text>
-            <text x="1055" y="135" class="node-text-sub">Tier-1 • 4x A100 (vLLM)</text>
+            <rect x="1120" y="85" width="195" height="70" class="node-box green"/>
+            <text x="1135" y="115" class="node-text-title">👑 Qwen-2.5-72B</text>
+            <text x="1135" y="136" class="node-text-sub">Tier-1 • 4x A100 (vLLM)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('qwen-32b')">
-            <rect x="1040" y="185" width="150" height="70" class="node-box blue"/>
-            <text x="1055" y="215" class="node-text-title">⚡ Qwen-2.5-32B</text>
-            <text x="1055" y="235" class="node-text-sub">Tier-2 • Резерв 2x A100</text>
+            <rect x="1120" y="185" width="195" height="70" class="node-box blue"/>
+            <text x="1135" y="215" class="node-text-title">⚡ Qwen-2.5-32B</text>
+            <text x="1135" y="236" class="node-text-sub">Tier-2 • Резерв 2x A100</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('qwen-7b')">
-            <rect x="1040" y="285" width="150" height="70" class="node-box amber"/>
-            <text x="1055" y="315" class="node-text-title">🚨 Qwen-14B/7B</text>
-            <text x="1055" y="335" class="node-text-sub">Tier-3 • AWQ Fast-Inf</text>
+            <rect x="1120" y="285" width="195" height="70" class="node-box amber"/>
+            <text x="1135" y="315" class="node-text-title">🚨 Qwen-14B/7B</text>
+            <text x="1135" y="336" class="node-text-sub">Tier-3 • AWQ Fast-Inf</text>
           </g>
 
           <!-- УЗЛЫ: ХРАНИЛИЩА -->
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <rect x="470" y="440" width="160" height="65" class="node-box slate"/>
-            <text x="490" y="468" class="node-text-title">🗄️ Redis Session Vault</text>
-            <text x="490" y="488" class="node-text-sub">Эфемерный PII (TTL 300s)</text>
+            <rect x="480" y="440" width="185" height="68" class="node-box slate"/>
+            <text x="498" y="468" class="node-text-title">🗄️ Redis Session Vault</text>
+            <text x="498" y="490" class="node-text-sub">Эфемерный PII (TTL 300s)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('semantic-cache')">
-            <rect x="660" y="440" width="160" height="65" class="node-box slate"/>
-            <text x="680" y="468" class="node-text-title">🔍 Vector DB (Qdrant)</text>
-            <text x="680" y="488" class="node-text-sub">Эмбеддинги кэша FAQ</text>
+            <rect x="690" y="440" width="185" height="68" class="node-box slate"/>
+            <text x="708" y="468" class="node-text-title">🔍 Vector DB (Qdrant)</text>
+            <text x="708" y="490" class="node-text-sub">Эмбеддинги кэша FAQ</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('kafka-siem')">
-            <rect x="850" y="440" width="180" height="65" class="node-box red"/>
-            <text x="865" y="468" class="node-text-title">🛡️ Kaspersky KUMA SIEM</text>
-            <text x="865" y="488" class="node-text-sub">CEF WORM Trail &amp; SOC</text>
+            <rect x="900" y="440" width="205" height="68" class="node-box red"/>
+            <text x="918" y="468" class="node-text-title">🛡️ Kaspersky KUMA SIEM</text>
+            <text x="918" y="490" class="node-text-sub">CEF WORM Trail &amp; SOC</text>
           </g>
         </svg>
       `;
     } else if (schemaKey === 'sequence') {
       svgHtml = `
-        <svg class="schema-svg-canvas" viewBox="0 0 1100 560" id="currentSvg">
+        <svg class="schema-svg-canvas" viewBox="0 0 1300 580" id="currentSvg">
           <g id="pulseLayer"></g>
           <!-- Вертикальные дорожки акторов -->
-          <line x1="120" y1="70" x2="120" y2="500" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
-          <line x1="320" y1="70" x2="320" y2="500" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
-          <line x1="520" y1="70" x2="520" y2="500" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
-          <line x1="720" y1="70" x2="720" y2="500" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
-          <line x1="920" y1="70" x2="920" y2="500" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
+          <line x1="90" y1="70" x2="90" y2="520" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
+          <line x1="370" y1="70" x2="370" y2="520" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
+          <line x1="650" y1="70" x2="650" y2="520" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
+          <line x1="930" y1="70" x2="930" y2="520" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
+          <line x1="1190" y1="70" x2="1190" y2="520" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4 4"/>
 
           <!-- Заголовки акторов -->
-          <rect x="50" y="20" width="140" height="40" class="node-box blue" onclick="inspectNode('mobile-app')"/>
-          <text x="75" y="45" class="node-text-title">📱 Клиент</text>
+          <rect x="20" y="20" width="140" height="40" class="node-box blue" onclick="inspectNode('mobile-app')"/>
+          <text x="48" y="45" class="node-text-title">📱 Клиент</text>
 
-          <rect x="250" y="20" width="140" height="40" class="node-box red" onclick="inspectNode('waf-ingress')"/>
-          <text x="270" y="45" class="node-text-title">⚡ AI Gateway</text>
+          <rect x="300" y="20" width="140" height="40" class="node-box red" onclick="inspectNode('waf-ingress')"/>
+          <text x="322" y="45" class="node-text-title">⚡ AI Gateway</text>
 
-          <rect x="450" y="20" width="140" height="40" class="node-box green" onclick="inspectNode('zero-pii-vault')"/>
-          <text x="470" y="45" class="node-text-title">🔒 Zero-PII Vault</text>
+          <rect x="580" y="20" width="140" height="40" class="node-box green" onclick="inspectNode('zero-pii-vault')"/>
+          <text x="596" y="45" class="node-text-title">🔒 Zero-PII Vault</text>
 
-          <rect x="650" y="20" width="140" height="40" class="node-box amber" onclick="inspectNode('semantic-cache')"/>
-          <text x="670" y="45" class="node-text-title">🔍 Semantic Cache</text>
+          <rect x="850" y="20" width="160" height="40" class="node-box amber" onclick="inspectNode('semantic-cache')"/>
+          <text x="866" y="45" class="node-text-title">🔍 Semantic Cache</text>
 
-          <rect x="850" y="20" width="140" height="40" class="node-box purple" onclick="inspectNode('qwen-72b')"/>
-          <text x="865" y="45" class="node-text-title">🧠 vLLM (Qwen-72B)</text>
+          <rect x="1110" y="20" width="160" height="40" class="node-box purple" onclick="inspectNode('qwen-72b')"/>
+          <text x="1122" y="45" class="node-text-title">🧠 vLLM Qwen-72B</text>
 
           <!-- Шаги взаимодействия -->
           <g class="node-group" onclick="inspectNode('waf-ingress')">
-            <path d="M 120 120 L 320 120" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)"/>
-            <text x="140" y="110" class="node-text-sub">1. POST /v1/chat/completions (Промпт + ПДн)</text>
+            <path d="M 90 120 L 370 120" stroke="#3b82f6" stroke-width="2"/>
+            <text x="110" y="110" class="node-text-sub">1. POST /v1/chat/completions (ПДн)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <path d="M 320 170 L 520 170" stroke="#10b981" stroke-width="2"/>
-            <text x="340" y="160" class="node-text-sub">2. Обезличивание: замена на [CARD_1], [FIO_1]</text>
-            <path d="M 520 200 L 320 200" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4"/>
-            <text x="340" y="220" class="node-text-sub">3. Очищенный промпт + Session ID (TTL=300s)</text>
+            <path d="M 370 170 L 650 170" stroke="#10b981" stroke-width="2"/>
+            <text x="390" y="160" class="node-text-sub">2. Токенизация: [CARD_1], [FIO_1]</text>
+            <path d="M 650 200 L 370 200" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="390" y="220" class="node-text-sub">3. Очищенный контекст (TTL=300s)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('semantic-cache')">
-            <path d="M 320 260 L 720 260" stroke="#f59e0b" stroke-width="2"/>
-            <text x="420" y="250" class="node-text-sub">4. Проверка кэша (Косинусная близость > 0.95)</text>
+            <path d="M 370 260 L 930 260" stroke="#f59e0b" stroke-width="2"/>
+            <text x="490" y="250" class="node-text-sub">4. Проверка семантического кэша (Cosine &gt; 0.95)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('qwen-72b')">
-            <path d="M 320 320 L 920 320" stroke="#8b5cf6" stroke-width="2"/>
-            <text x="510" y="310" class="node-text-sub">5. vLLM Streaming Инференс (Continuous Batching)</text>
-            <path d="M 920 370 L 320 370" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4 4"/>
-            <text x="510" y="390" class="node-text-sub">6. Поток токенов ответа</text>
+            <path d="M 370 320 L 1190 320" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="560" y="310" class="node-text-sub">5. vLLM Streaming Инференс (Continuous Batching)</text>
+            <path d="M 1190 370 L 370 370" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="560" y="390" class="node-text-sub">6. Потоковый стриминг токенов ответа (SSE)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('nli-fact-guard')">
-            <rect x="290" y="415" width="220" height="30" class="node-box amber"/>
-            <text x="300" y="435" class="node-text-title">⚖️ 7. NLI Fact Check vs Регламент</text>
+            <rect x="340" y="415" width="280" height="32" class="node-box amber"/>
+            <text x="355" y="437" class="node-text-title">⚖️ 7. NLI Fact Check vs Регламент</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <path d="M 320 465 L 520 465" stroke="#10b981" stroke-width="2"/>
-            <text x="340" y="460" class="node-text-sub">8. Де-маскирование данных</text>
+            <path d="M 370 465 L 650 465" stroke="#10b981" stroke-width="2"/>
+            <text x="390" y="460" class="node-text-sub">8. Де-маскирование реальных значений</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('mobile-app')">
-            <path d="M 320 495 L 120 495" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4 4"/>
-            <text x="140" y="490" class="node-text-sub">9. 200 OK: Финальный ответ клиенту</text>
+            <path d="M 370 495 L 90 495" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="110" y="490" class="node-text-sub">9. 200 OK: Безопасный ответ клиенту</text>
           </g>
         </svg>
       `;
     } else if (schemaKey === 'circuit-breaker') {
       svgHtml = `
-        <svg class="schema-svg-canvas" viewBox="0 0 1100 540" id="currentSvg">
+        <svg class="schema-svg-canvas" viewBox="0 0 1220 540" id="currentSvg">
           <g id="pulseLayer"></g>
           <!-- Состояния Circuit Breaker -->
           <g class="node-group" onclick="inspectNode('circuit-router')">
-            <rect x="80" y="100" width="260" height="150" class="node-box green"/>
-            <circle cx="115" cy="135" r="10" fill="#10b981"/>
-            <text x="140" y="140" class="node-text-title" font-size="16">🟢 CLOSED (Штатный)</text>
-            <text x="105" y="175" class="node-text-sub">• 100% трафика на Qwen-72B</text>
-            <text x="105" y="195" class="node-text-sub">• Ошибки 5xx < 5%</text>
-            <text x="105" y="215" class="node-text-sub">• Latency P99 < 2500 мс</text>
+            <rect x="50" y="100" width="280" height="150" class="node-box green"/>
+            <circle cx="85" cy="135" r="10" fill="#10b981"/>
+            <text x="110" y="140" class="node-text-title" font-size="16">🟢 CLOSED (Штатный)</text>
+            <text x="75" y="175" class="node-text-sub">• 100% трафика на Qwen-72B</text>
+            <text x="75" y="195" class="node-text-sub">• Ошибки 5xx &lt; 5%</text>
+            <text x="75" y="215" class="node-text-sub">• Latency P99 &lt; 2500 мс</text>
           </g>
 
           <!-- Переход в OPEN -->
-          <path d="M 340 175 L 480 175" class="wire wire-red" stroke-width="3"/>
-          <text x="360" y="160" class="node-text-sub" fill="#f87171">KV-кэш > 95% ИЛИ Latency > 5s</text>
+          <path d="M 330 175 L 510 175" class="wire wire-red" stroke-width="3"/>
+          <text x="345" y="150" class="node-text-sub" fill="#f87171">KV-кэш &gt; 95% ИЛИ</text>
+          <text x="345" y="167" class="node-text-sub" fill="#f87171">Latency &gt; 5000 мс</text>
 
           <g class="node-group" onclick="inspectNode('circuit-router')">
-            <rect x="480" y="100" width="260" height="150" class="node-box red"/>
-            <circle cx="515" cy="135" r="10" fill="#ef4444"/>
-            <text x="540" y="140" class="node-text-title" font-size="16">🔴 OPEN (Защита)</text>
-            <text x="505" y="175" class="node-text-sub">• Каскадный фоллбэк на Tier-2/3</text>
-            <text x="505" y="195" class="node-text-sub">• Сброс фоновых очередей (429)</text>
-            <text x="505" y="215" class="node-text-sub">• Cooldown таймер: 30 сек</text>
+            <rect x="510" y="100" width="280" height="150" class="node-box red"/>
+            <circle cx="545" cy="135" r="10" fill="#ef4444"/>
+            <text x="570" y="140" class="node-text-title" font-size="16">🔴 OPEN (Защита)</text>
+            <text x="535" y="175" class="node-text-sub">• Каскадный фоллбэк на Tier-2/3</text>
+            <text x="535" y="195" class="node-text-sub">• Сброс фоновых очередей (429)</text>
+            <text x="535" y="215" class="node-text-sub">• Cooldown таймер: 30 сек</text>
           </g>
 
           <!-- Переход в HALF-OPEN -->
-          <path d="M 610 250 C 610 320, 800 320, 800 250" class="wire wire-amber" stroke-width="2"/>
-          <text x="640" y="315" class="node-text-sub" fill="#fbbf24">Таймер 30с истек</text>
+          <path d="M 650 250 C 650 325, 950 325, 950 250" class="wire wire-amber" stroke-width="2"/>
+          <text x="740" y="320" class="node-text-sub" fill="#fbbf24">Таймер 30с истек</text>
 
           <g class="node-group" onclick="inspectNode('circuit-router')">
-            <rect x="760" y="100" width="260" height="150" class="node-box amber"/>
-            <circle cx="795" cy="135" r="10" fill="#f59e0b"/>
-            <text x="820" y="140" class="node-text-title" font-size="16">🟡 HALF-OPEN (Canary)</text>
-            <text x="785" y="175" class="node-text-sub">• 5% пробного трафика на 72B</text>
-            <text x="785" y="195" class="node-text-sub">• Проверка успешности ответов</text>
-            <text x="785" y="215" class="node-text-sub">• При успехе >95% -> CLOSED</text>
+            <rect x="880" y="100" width="290" height="150" class="node-box amber"/>
+            <circle cx="915" cy="135" r="10" fill="#f59e0b"/>
+            <text x="940" y="140" class="node-text-title" font-size="16">🟡 HALF-OPEN (Canary)</text>
+            <text x="905" y="175" class="node-text-sub">• 5% пробного трафика на 72B</text>
+            <text x="905" y="195" class="node-text-sub">• Проверка успешности ответов</text>
+            <text x="905" y="215" class="node-text-sub">• При успехе &gt;95% ➔ CLOSED</text>
           </g>
 
+          <!-- Петля возврата в CLOSED -->
+          <path d="M 1025 100 C 1025 35, 190 35, 190 100" class="wire wire-green" stroke-width="2"/>
+          <text x="500" y="28" class="node-text-sub" fill="#34d399">Успех canary-запросов &gt; 95% ➔ Восстановление в CLOSED</text>
+
           <!-- Дерево решений внизу -->
-          <rect x="150" y="380" width="800" height="120" class="node-box slate"/>
-          <text x="180" y="415" class="node-text-title">⚡ АЛГОРИТМ КАСКАДНОЙ ДЕГРАДАЦИИ (FALLBACK CASCADE)</text>
-          <text x="180" y="445" class="node-text-sub">1. Tier-1: Qwen-2.5-72B (Штатно) ➔ При сбое / таймауте 2.5s переход на:</text>
-          <text x="180" y="465" class="node-text-sub">2. Tier-2: Qwen-2.5-32B / 14B (Standby) ➔ При пиковой нагрузке переход на:</text>
-          <text x="180" y="485" class="node-text-sub">3. Tier-3: Qwen-2.5-7B-AWQ (Low-latency) ➔ Аварийная заглушка / Semantic Cache</text>
+          <rect x="50" y="380" width="1120" height="130" class="node-box slate"/>
+          <text x="75" y="415" class="node-text-title">⚡ АЛГОРИТМ КАСКАДНОЙ ДЕГРАДАЦИИ (FALLBACK CASCADE)</text>
+          <text x="75" y="445" class="node-text-sub">1. Tier-1: Qwen-2.5-72B (Штатно) ➔ При сбое / таймауте 2.5s переход на:</text>
+          <text x="75" y="468" class="node-text-sub">2. Tier-2: Qwen-2.5-32B / 14B (Standby) ➔ При пиковой перегрузке переход на:</text>
+          <text x="75" y="491" class="node-text-sub">3. Tier-3: Qwen-2.5-7B-AWQ (Low-latency) ➔ Аварийная заглушка / Semantic Cache</text>
         </svg>
       `;
     } else if (schemaKey === 'guardrails') {
       svgHtml = `
-        <svg class="schema-svg-canvas" viewBox="0 0 1150 540" id="currentSvg">
+        <svg class="schema-svg-canvas" viewBox="0 0 1240 540" id="currentSvg">
           <g id="pulseLayer"></g>
           <!-- Этап 1: Вход -->
-          <rect x="40" y="70" width="320" height="400" class="node-box blue"/>
-          <text x="60" y="105" class="node-text-title">🛡️ 1. ВХОДНОЙ ФИЛЬТР (< 12 мс)</text>
+          <rect x="30" y="60" width="340" height="430" class="node-box blue"/>
+          <text x="50" y="95" class="node-text-title">🛡️ 1. ВХОДНОЙ ФИЛЬТР (&lt; 12 мс)</text>
           
           <g class="node-group" onclick="inspectNode('ru-guardrails-in')">
-            <rect x="60" y="130" width="280" height="65" class="node-box amber"/>
-            <text x="80" y="160" class="node-text-title">RuJailbreak Vector Match</text>
-            <text x="80" y="180" class="node-text-sub">Блокировка попыток обхода промпта</text>
+            <rect x="50" y="125" width="300" height="65" class="node-box amber"/>
+            <text x="68" y="155" class="node-text-title">RuJailbreak Vector Match</text>
+            <text x="68" y="175" class="node-text-sub">Блокировка попыток обхода промпта</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('ru-guardrails-in')">
-            <rect x="60" y="215" width="280" height="65" class="node-box amber"/>
-            <text x="80" y="245" class="node-text-title">RuBERT-Tiny-Toxicity</text>
-            <text x="80" y="265" class="node-text-sub">Мат, оскорбления, агрессия (< 8 мс)</text>
+            <rect x="50" y="210" width="300" height="65" class="node-box amber"/>
+            <text x="68" y="240" class="node-text-title">RuBERT-Tiny-Toxicity</text>
+            <text x="68" y="260" class="node-text-sub">Мат, оскорбления, агрессия (&lt; 8 мс)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <rect x="60" y="300" width="280" height="65" class="node-box green"/>
-            <text x="80" y="330" class="node-text-title">Zero-PII Vault Tokenizer</text>
-            <text x="80" y="350" class="node-text-sub">Алгоритм Луна + Natasha Ru-NER</text>
+            <rect x="50" y="295" width="300" height="65" class="node-box green"/>
+            <text x="68" y="325" class="node-text-title">Zero-PII Vault Tokenizer</text>
+            <text x="68" y="345" class="node-text-sub">Алгоритм Луна + Natasha Ru-NER</text>
           </g>
 
           <!-- Связь -->
-          <path d="M 360 270 L 440 270" class="wire wire-green" stroke-width="3"/>
+          <path d="M 370 275 L 450 275" class="wire wire-green" stroke-width="3"/>
 
           <!-- Этап 2: Инференс -->
-          <rect x="440" y="170" width="260" height="200" class="node-box purple" onclick="inspectNode('qwen-72b')"/>
-          <text x="470" y="210" class="node-text-title">🧠 2. ИНФЕРЕНС vLLM</text>
-          <text x="470" y="240" class="node-text-sub">• Qwen-2.5 On-Prem Cluster</text>
-          <text x="470" y="265" class="node-text-sub">• PagedAttention Continuous Batch</text>
-          <text x="470" y="290" class="node-text-sub">• Модель оперирует только токенами</text>
-          <text x="470" y="315" class="node-text-sub">• В логах НЕТ реальных ПДн</text>
+          <rect x="450" y="145" width="320" height="260" class="node-box purple" onclick="inspectNode('qwen-72b')"/>
+          <text x="475" y="185" class="node-text-title">🧠 2. ИНФЕРЕНС vLLM</text>
+          <text x="475" y="215" class="node-text-sub">• Qwen-2.5 On-Prem Cluster</text>
+          <text x="475" y="240" class="node-text-sub">• PagedAttention Continuous Batch</text>
+          <text x="475" y="265" class="node-text-sub">• Модель оперирует только токенами</text>
+          <text x="475" y="290" class="node-text-sub">• В логах НЕТ реальных ПДн</text>
+          <text x="475" y="315" class="node-text-sub">• KV-кэш защищен Circuit Breaker</text>
 
           <!-- Связь -->
-          <path d="M 700 270 L 780 270" class="wire wire-blue" stroke-width="3"/>
+          <path d="M 770 275 L 850 275" class="wire wire-blue" stroke-width="3"/>
 
           <!-- Этап 3: Выходной аудит -->
-          <rect x="780" y="70" width="330" height="400" class="node-box green"/>
-          <text x="800" y="105" class="node-text-title">⚖️ 3. ВЫХОДНОЙ АУДИТ И ФАКТЫ</text>
+          <rect x="850" y="60" width="360" height="430" class="node-box green"/>
+          <text x="870" y="95" class="node-text-title">⚖️ 3. ВЫХОДНОЙ АУДИТ И ФАКТЫ</text>
 
           <g class="node-group" onclick="inspectNode('ru-guardrails-in')">
-            <rect x="800" y="130" width="290" height="65" class="node-box amber"/>
-            <text x="820" y="160" class="node-text-title">Output Tone & Toxicity</text>
-            <text x="820" y="180" class="node-text-sub">Проверка тональности ответа модели</text>
+            <rect x="870" y="125" width="320" height="65" class="node-box amber"/>
+            <text x="888" y="155" class="node-text-title">Output Tone &amp; Toxicity</text>
+            <text x="888" y="175" class="node-text-sub">Проверка тональности ответа модели</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('nli-fact-guard')">
-            <rect x="800" y="215" width="290" height="65" class="node-box green"/>
-            <text x="820" y="245" class="node-text-title">NLI Cross-Encoder (mDeBERTa)</text>
-            <text x="820" y="265" class="node-text-sub">Анти-галлюцинация vs RAG Регламент</text>
+            <rect x="870" y="210" width="320" height="65" class="node-box green"/>
+            <text x="888" y="240" class="node-text-title">NLI Cross-Encoder (mDeBERTa)</text>
+            <text x="888" y="260" class="node-text-sub">Анти-галлюцинация vs RAG Регламент</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('nli-fact-guard')">
-            <rect x="800" y="300" width="290" height="65" class="node-box blue"/>
-            <text x="820" y="330" class="node-text-title">Числовой аудитор & Schema</text>
-            <text x="820" y="350" class="node-text-sub">Сверка % ставок, сумм и дат кредита</text>
+            <rect x="870" y="295" width="320" height="65" class="node-box blue"/>
+            <text x="888" y="325" class="node-text-title">Числовой аудитор &amp; Schema</text>
+            <text x="888" y="345" class="node-text-sub">Сверка % ставок, сумм и дат кредита</text>
           </g>
         </svg>
       `;
     } else if (schemaKey === 'vault') {
       svgHtml = `
-        <svg class="schema-svg-canvas" viewBox="0 0 1150 540" id="currentSvg">
+        <svg class="schema-svg-canvas" viewBox="0 0 1200 540" id="currentSvg">
           <g id="pulseLayer"></g>
           <!-- Шаг 1: Исходный запрос -->
-          <rect x="40" y="40" width="1070" height="70" class="node-box red"/>
-          <text x="60" y="70" class="node-text-title">1. ВХОДЯЩИЙ ЗАПРОС КЛИЕНТА (С ЧУВСТВИТЕЛЬНЫМИ ДАННЫМИ):</text>
-          <text x="60" y="92" class="node-text-sub" fill="#fca5a5">"Клиент Иванов Иван Иванович, паспорт 4510 123456, переведи 25 000 руб с карты 4276 3800 1234 5678 на накопительный счет"</text>
+          <rect x="30" y="35" width="1140" height="75" class="node-box red"/>
+          <text x="50" y="65" class="node-text-title">1. ВХОДЯЩИЙ ЗАПРОС КЛИЕНТА (С ЧУВСТВИТЕЛЬНЫМИ ДАННЫМИ):</text>
+          <text x="50" y="90" class="node-text-sub" fill="#fca5a5">"Клиент Иванов Иван Иванович, паспорт 4510 123456, переведи 25 000 руб с карты 4276 3800 1234 5678 на накопительный счет"</text>
 
           <!-- Шаг 2: Детекторы -->
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <rect x="60" y="150" width="280" height="80" class="node-box amber"/>
-            <text x="80" y="185" class="node-text-title">💳 Алгоритм Луна (Luhn)</text>
-            <text x="80" y="205" class="node-text-sub">Валидация контрольной суммы карты</text>
+            <rect x="30" y="140" width="350" height="85" class="node-box amber"/>
+            <text x="50" y="175" class="node-text-title">💳 Алгоритм Луна (Luhn)</text>
+            <text x="50" y="200" class="node-text-sub">Валидация контрольной суммы карты</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <rect x="435" y="150" width="280" height="80" class="node-box amber"/>
-            <text x="455" y="185" class="node-text-title">👤 Natasha Ru-NER</text>
-            <text x="455" y="205" class="node-text-sub">Извлечение ФИО в косвенных падежах</text>
+            <rect x="425" y="140" width="350" height="85" class="node-box amber"/>
+            <text x="445" y="175" class="node-text-title">👤 Natasha Ru-NER</text>
+            <text x="445" y="200" class="node-text-sub">Извлечение ФИО в косвенных падежах</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <rect x="810" y="150" width="280" height="80" class="node-box amber"/>
-            <text x="830" y="185" class="node-text-title">📄 Regex Паспорта РФ</text>
-            <text x="830" y="205" class="node-text-sub">Серия и номер документа гражданина</text>
+            <rect x="820" y="140" width="350" height="85" class="node-box amber"/>
+            <text x="840" y="175" class="node-text-title">📄 Regex Паспорта РФ</text>
+            <text x="840" y="200" class="node-text-sub">Серия и номер документа гражданина</text>
           </g>
 
           <!-- Шаг 3: Redis Vault -->
           <g class="node-group" onclick="inspectNode('zero-pii-vault')">
-            <rect x="250" y="270" width="650" height="90" class="node-box slate"/>
-            <text x="270" y="300" class="node-text-title">🔑 ЭФЕМЕРНЫЙ REDIS SESSION VAULT (TTL = 300 СЕКУНД)</text>
-            <text x="270" y="325" class="node-text-sub" font-family="monospace">[CARD_1] ➔ '4276 3800 1234 5678' | [FIO_1] ➔ 'Иванов Иван Иванович' | [PASS_1] ➔ '4510 123456'</text>
-            <text x="270" y="345" class="node-text-sub" fill="#34d399">✓ Данные хранятся только в RAM и уничтожаются сразу после ответа</text>
+            <rect x="30" y="255" width="1140" height="110" class="node-box slate"/>
+            <text x="50" y="285" class="node-text-title">🔑 ЭФЕМЕРНЫЙ REDIS SESSION VAULT (TTL = 300 СЕКУНД)</text>
+            <text x="50" y="315" class="node-text-sub" font-family="monospace" font-size="12">[CARD_1] ➔ '4276 3800 1234 5678'  |  [FIO_1] ➔ 'Иванов Иван Иванович'  |  [PASS_1] ➔ '4510 123456'</text>
+            <text x="50" y="342" class="node-text-sub" fill="#34d399">✓ Данные хранятся только в RAM и уничтожаются сразу после ответа (152-ФЗ / 395-1)</text>
           </g>
 
           <!-- Шаг 4: Обезличенный инференс -->
           <g class="node-group" onclick="inspectNode('qwen-72b')">
-            <rect x="40" y="400" width="1070" height="100" class="node-box green"/>
-            <text x="60" y="430" class="node-text-title">4. БЕЗОПАСНЫЙ ИНФЕРЕНС В vLLM (QWEN-72B) И ДЕ-АНОНИМИЗАЦИЯ:</text>
-            <text x="60" y="455" class="node-text-sub">• Модель видит только синтетику: "Клиент [FIO_1], паспорт [PASS_1], перевод с карты [CARD_1]"</text>
-            <text x="60" y="480" class="node-text-sub" fill="#34d399">• Процессор обратной де-токенизации подставляет реальные значения перед отправкой в Мобильный банк</text>
+            <rect x="30" y="395" width="1140" height="105" class="node-box green"/>
+            <text x="50" y="425" class="node-text-title">4. БЕЗОПАСНЫЙ ИНФЕРЕНС В vLLM (QWEN-72B) И ДЕ-АНОНИМИЗАЦИЯ:</text>
+            <text x="50" y="452" class="node-text-sub">• Модель видит только синтетику: "Клиент [FIO_1], паспорт [PASS_1], перевод с карты [CARD_1]"</text>
+            <text x="50" y="478" class="node-text-sub" fill="#34d399">• Процессор обратной де-токенизации подставляет реальные значения перед отправкой в Мобильный банк</text>
           </g>
         </svg>
       `;
     } else if (schemaKey === 'qos') {
       svgHtml = `
-        <svg class="schema-svg-canvas" viewBox="0 0 1150 540" id="currentSvg">
+        <svg class="schema-svg-canvas" viewBox="0 0 1240 540" id="currentSvg">
           <g id="pulseLayer"></g>
           <!-- Потоки -->
           <g class="node-group" onclick="inspectNode('mobile-app')">
-            <rect x="40" y="80" width="280" height="85" class="node-box red"/>
-            <text x="60" y="115" class="node-text-title">🔴 Realtime VIP (P0)</text>
-            <text x="60" y="135" class="node-text-sub">Мобильный банк, Чат клиента (SLA < 1.5s)</text>
+            <rect x="30" y="80" width="310" height="85" class="node-box red"/>
+            <text x="50" y="115" class="node-text-title">🔴 Realtime VIP (P0)</text>
+            <text x="50" y="138" class="node-text-sub">Мобильный банк, Чат (SLA &lt; 1.5s)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('mobile-app')">
-            <rect x="40" y="215" width="280" height="85" class="node-box amber"/>
-            <text x="60" y="250" class="node-text-title">🟡 Standard (P1)</text>
-            <text x="60" y="270" class="node-text-sub">CRM суфлер, внутренние АС (SLA < 5s)</text>
+            <rect x="30" y="215" width="310" height="85" class="node-box amber"/>
+            <text x="50" y="250" class="node-text-title">🟡 Standard (P1)</text>
+            <text x="50" y="273" class="node-text-sub">CRM суфлер, внутренние АС (SLA &lt; 5s)</text>
           </g>
 
           <g class="node-group" onclick="inspectNode('mobile-app')">
-            <rect x="40" y="350" width="280" height="85" class="node-box blue"/>
-            <text x="60" y="385" class="node-text-title">🟢 Batch / Offline (P2)</text>
-            <text x="60" y="405" class="node-text-sub">Пакетный скоринг архива (SLA < 1 час)</text>
+            <rect x="30" y="350" width="310" height="85" class="node-box blue"/>
+            <text x="50" y="385" class="node-text-title">🟢 Batch / Offline (P2)</text>
+            <text x="50" y="408" class="node-text-sub">Пакетный скоринг архива (SLA &lt; 1 час)</text>
           </g>
 
           <!-- Очереди WFQ -->
-          <path d="M 320 120 L 440 120" class="wire wire-red" stroke-width="3"/>
-          <path d="M 320 255 L 440 255" class="wire wire-amber" stroke-width="3"/>
-          <path d="M 320 390 L 440 390" class="wire wire-blue" stroke-width="3"/>
+          <path d="M 340 120 L 440 120" class="wire wire-red" stroke-width="3"/>
+          <path d="M 340 255 L 440 255" class="wire wire-amber" stroke-width="3"/>
+          <path d="M 340 390 L 440 390" class="wire wire-blue" stroke-width="3"/>
 
-          <rect x="440" y="50" width="300" height="420" class="node-box slate"/>
-          <text x="460" y="85" class="node-text-title">⚖️ WEIGHTED FAIR QUEUING (WFQ)</text>
+          <rect x="440" y="50" width="350" height="420" class="node-box slate"/>
+          <text x="465" y="85" class="node-text-title">⚖️ WEIGHTED FAIR QUEUING (WFQ)</text>
           
-          <rect x="460" y="110" width="260" height="70" class="node-box red"/>
+          <rect x="460" y="110" width="310" height="70" class="node-box red"/>
           <text x="480" y="140" class="node-text-title">Очередь P0 (Вес: 70%)</text>
-          <text x="480" y="160" class="node-text-sub">Выделенные гарантированные GPU слоты</text>
+          <text x="480" y="162" class="node-text-sub">Выделенные гарантированные слоты GPU</text>
 
-          <rect x="460" y="225" width="260" height="70" class="node-box amber"/>
+          <rect x="460" y="225" width="310" height="70" class="node-box amber"/>
           <text x="480" y="255" class="node-text-title">Очередь P1 (Вес: 20%)</text>
-          <text x="480" y="275" class="node-text-sub">Динамический балансировочный пул</text>
+          <text x="480" y="277" class="node-text-sub">Динамический балансировочный пул</text>
 
-          <rect x="460" y="340" width="260" height="70" class="node-box blue"/>
+          <rect x="460" y="340" width="310" height="70" class="node-box blue"/>
           <text x="480" y="370" class="node-text-title">Очередь P2 (Вес: 10%)</text>
-          <text x="480" y="390" class="node-text-sub">Фоновый пул с мгновенным вытеснением</text>
+          <text x="480" y="392" class="node-text-sub">Фоновый пул с мгновенным вытеснением</text>
 
           <!-- GPU Исполнитель -->
-          <path d="M 740 255 L 840 255" class="wire wire-green" stroke-width="3"/>
+          <path d="M 790 255 L 870 255" class="wire wire-green" stroke-width="3"/>
 
-          <rect x="840" y="150" width="270" height="210" class="node-box green" onclick="inspectNode('qwen-72b')"/>
-          <text x="860" y="190" class="node-text-title">🚀 GPU SCHEDULER & SLOTS</text>
-          <text x="860" y="220" class="node-text-sub">• vLLM PagedAttention Slots</text>
-          <text x="860" y="245" class="node-text-sub">• Приоритетное вытеснение фоновых задач</text>
-          <text x="860" y="270" class="node-text-sub">• Защита VIP-клиентов от очередей</text>
-          <text x="860" y="295" class="node-text-sub" fill="#34d399">✓ Гарантия P99 < 1.5s в Мобильном банке</text>
+          <rect x="870" y="130" width="330" height="250" class="node-box green" onclick="inspectNode('qwen-72b')"/>
+          <text x="895" y="170" class="node-text-title">🚀 GPU SCHEDULER &amp; SLOTS</text>
+          <text x="895" y="205" class="node-text-sub">• vLLM PagedAttention Slots</text>
+          <text x="895" y="235" class="node-text-sub">• Приоритетное вытеснение задач P2</text>
+          <text x="895" y="265" class="node-text-sub">• Защита VIP-клиентов от задержек</text>
+          <text x="895" y="295" class="node-text-sub" fill="#34d399">✓ Гарантия P99 &lt; 1.5s в Мобильном банке</text>
         </svg>
       `;
     }
