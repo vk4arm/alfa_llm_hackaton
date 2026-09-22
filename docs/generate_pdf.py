@@ -858,7 +858,7 @@ pdf_path = "/Users/victor/work/СТРАННОЕ/alfa/docs/BANK_LLM_PROXY_ANALYSI
 with open(html_path, "w", encoding="utf-8") as f:
     f.write(html_content)
 
-print(f"HTML generated at {html_path}")
+print(f"HTML saved at {html_path}")
 
 # Вызываем Google Chrome Headless для печати в PDF
 chrome_bin = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"

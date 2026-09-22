@@ -1,106 +1,70 @@
 """
-ZERO-PII VAULT: Reversible Anonymizer & Tokenizer
-Compliant with Russian Federal Laws: 152-FZ & 395-1 (Banking Secrecy)
+ZERO-PII VAULT: Reversible Anonymizer & Tokenizer Service
+Compliant with Russian Federal Laws: 152-FZ & 395-1 (Banking Secrecy).
+
+Integrates high-speed algorithmic validators and Natasha NER for complete
+Russian personal identifiable information (PII) detection and redaction.
 """
 
-import re
+import os
 import uuid
 from typing import Dict, Tuple, List, Optional
-
-def luhn_checksum_valid(card_number_str: str) -> bool:
-    """Validates 16-digit card number using Luhn algorithm."""
-    digits = [int(c) for c in card_number_str if c.isdigit()]
-    if len(digits) < 13 or len(digits) > 19:
-        return False
-    
-    checksum = 0
-    reverse_digits = digits[::-1]
-    for i, digit in enumerate(reverse_digits):
-        if i % 2 == 1:
-            doubled = digit * 2
-            checksum += doubled if doubled < 10 else doubled - 9
-        else:
-            checksum += digit
-    return checksum % 10 == 0
+try:
+    from .masker import NatashaPIIMasker, luhn_checksum_valid, validate_inn
+except ImportError:
+    from masker import NatashaPIIMasker, luhn_checksum_valid, validate_inn
 
 class ZeroPiiVault:
-    def __init__(self, redis_client=None, session_ttl_sec: int = 300):
+    def __init__(self, redis_client=None, session_ttl_sec: int = 300, granular_address: bool = False):
         self.redis = redis_client
         self.session_ttl_sec = session_ttl_sec
         self.memory_store: Dict[str, Dict[str, str]] = {}
-        
-        # Regex patterns for Russian PII
-        self.card_pattern = re.compile(r'\b(?:\d[ -]*?){13,19}\b')
-        self.passport_pattern = re.compile(r'\b\d{2}\s?\d{2}\s?\d{6}\b')
-        self.snils_pattern = re.compile(r'\b\d{3}-\d{3}-\d{3}\s?\d{2}\b')
-        self.phone_pattern = re.compile(r'\b(?:\+7|8)[\s\-]?(?:\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}\b')
+        self.masker = NatashaPIIMasker(granular_address=granular_address)
 
     def mask_text(self, text: str, session_id: Optional[str] = None) -> Tuple[str, str, Dict[str, str]]:
         """
-        Masks all sensitive banking data, replaces with synthetic tokens:
-        [CARD_1], [PASSPORT_1], [PHONE_1], etc.
+        Masks all sensitive banking & personal data across 16 categories.
+        Replaces detected spans with reversible synthetic tokens.
         Returns: (sanitized_text, session_id, mapping)
         """
-        if not session_id:
-            session_id = str(uuid.uuid4())
-            
-        mapping: Dict[str, str] = {}
-        card_counter = 1
-        passport_counter = 1
-        phone_counter = 1
+        masked_text, session_id, mapping = self.masker.mask(text, session_id=session_id)
+        
+        # Store in Redis or in-memory store
+        if self.redis:
+            try:
+                import json
+                self.redis.setex(f"pii_session:{session_id}", self.session_ttl_sec, json.dumps(mapping))
+            except Exception:
+                self.memory_store[session_id] = mapping
+        else:
+            self.memory_store[session_id] = mapping
 
-        # 1. Mask bank cards (validated via Luhn algorithm)
-        def replace_card(match):
-            nonlocal card_counter
-            raw_card = match.group(0)
-            cleaned = re.sub(r'[\s\-]', '', raw_card)
-            if len(cleaned) == 16 and luhn_checksum_valid(cleaned):
-                token = f"[CARD_{card_counter}]"
-                mapping[token] = raw_card
-                card_counter += 1
-                return token
-            return raw_card
-
-        sanitized = self.card_pattern.sub(replace_card, text)
-
-        # 2. Mask passports
-        def replace_passport(match):
-            nonlocal passport_counter
-            raw = match.group(0)
-            token = f"[PASSPORT_{passport_counter}]"
-            mapping[token] = raw
-            passport_counter += 1
-            return token
-
-        sanitized = self.passport_pattern.sub(replace_passport, sanitized)
-
-        # 3. Mask phones
-        def replace_phone(match):
-            nonlocal phone_counter
-            raw = match.group(0)
-            token = f"[PHONE_{phone_counter}]"
-            mapping[token] = raw
-            phone_counter += 1
-            return token
-
-        sanitized = self.phone_pattern.sub(replace_phone, sanitized)
-
-        # Store in Redis / memory with TTL
-        self.memory_store[session_id] = mapping
-
-        return sanitized, session_id, mapping
+        return masked_text, session_id, mapping
 
     def unmask_text(self, text: str, session_id: str) -> str:
         """
         Reverses tokenization using the ephemeral session mapping.
         """
-        mapping = self.memory_store.get(session_id, {})
-        result = text
-        for token, original_value in mapping.items():
-            result = result.replace(token, original_value)
-        return result
+        mapping = {}
+        if self.redis:
+            try:
+                import json
+                raw = self.redis.get(f"pii_session:{session_id}")
+                if raw:
+                    mapping = json.loads(raw)
+            except Exception:
+                mapping = self.memory_store.get(session_id, {})
+        else:
+            mapping = self.memory_store.get(session_id, {})
+
+        return self.masker.unmask(text, mapping)
 
     def purge_session(self, session_id: str):
         """Immediately destroy ephemeral session keys."""
+        if self.redis:
+            try:
+                self.redis.delete(f"pii_session:{session_id}")
+            except Exception:
+                pass
         if session_id in self.memory_store:
             del self.memory_store[session_id]
