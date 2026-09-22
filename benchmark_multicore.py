@@ -83,6 +83,7 @@ def benchmark_multi_core(records: List[str], p_masker: ParallelPIIMasker, chunks
 def main():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "data", "pii_samples"))
     datasets = [
+        ("4 KB", os.path.join(base_dir, "pii_dataset_4kb.txt"), 1),
         ("15 KB", os.path.join(base_dir, "pii_dataset_15kb.txt"), 4),
         ("100 KB", os.path.join(base_dir, "pii_dataset_100kb.txt"), 8),
         ("2 MB", os.path.join(base_dir, "pii_dataset_2mb.txt"), 25),
