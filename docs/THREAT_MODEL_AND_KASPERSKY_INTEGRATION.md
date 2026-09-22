@@ -73,15 +73,15 @@
 
 ## 3. Детализация средств защиты и сопоставление с международными аналогами
 
-Для обеспечения технологической нейтральности и гибкости архитектура шлюза спроектирована по принципу **Vendor-Agnostic Interface**: взаимодействие со средствами защиты осуществляется через стандартизированные протоколы (Syslog TLS / ArcSight CEF, ICAP, eBPF, OCI). Это позволяет использовать как развернутый в контуре банка стек продуктов, так и международные решения корпоративного класса (Global Tier-1):
+Для обеспечения технологической нейтральности и гибкости архитектура шлюза спроектирована по принципу **Vendor-Agnostic Interface**: интеграция со средствами защиты реализуется через открытые стандарты — сетевые протоколы передачи данных (Syslog over TLS, ICAP, HTTP/2), общепринятые форматы событий аудита (Common Event Format / CEF) и низкоуровневые интерфейсы ядра ОС и контейнеризации (подсистема eBPF, спецификации OCI). Это обеспечивает полную совместимость как с развернутым в контуре банка стеком продуктов, так и с международными решениями корпоративного класса (Global Tier-1):
 
-| Класс средств защиты | Продукт в контуре банка | Международные аналоги (Global Tier-1) | Стандарт интеграции | Роль в контуре LLM-шлюза |
+| Класс средств защиты | Продукт в контуре банка | Международные аналоги (Global Tier-1) | Протоколы и механизмы интеграции | Роль в контуре LLM-шлюза |
 | :--- | :--- | :--- | :--- | :--- |
-| **SIEM & Security Analytics** | **KUMA SIEM** | **Splunk Enterprise Security**, **IBM QRadar**, **Microsoft Sentinel**, **Elastic Security** | Syslog TLS (порт 6514), CEF, Kafka | Прием WORM-логов, корреляция всплесков Jailbreak и аномалий де-маскирования ПДн |
-| **Container & K8s Security** | **Kaspersky Container Security (KCS)** | **Palo Alto Prisma Cloud**, **Aqua Security**, **Sysdig Secure**, **Wiz** | OCI Image Scan, eBPF sensor, K8s Admission | Сканирование образов Python/vLLM на CVE до релиза, блокировка Container Escape на GPU |
-| **Storage & RAG Anti-Malware** | **Kaspersky Security for Storage (KSS)** | **Trend Micro Deep Security / Cloud One**, **Trellix Storage Security** | ICAP Protocol, RPC Storage API | Потоковый пре-скан клиентских PDF-досье и регламентов до векторизации в Qdrant |
-| **EDR & Host Defense (GPU)** | **KATA & EDR Expert** | **CrowdStrike Falcon**, **SentinelOne Singularity**, **Microsoft Defender for Endpoint** | Linux Kernel Module, eBPF telemetry | Контроль целостности ядра Linux на серверах NVIDIA A100, защита видеодрайверов и CUDA |
-| **Perimeter Web WAF & Proxy** | **Kaspersky Web Traffic Security (KWTS)** | **Cloudflare WAF / API Shield**, **F5 BIG-IP Advanced WAF**, **Akamai App & API Protector** | HTTP/2, WebSocket, ГОСТ TLS 1.3 | Фильтрация входящих клиентских сессий, защита от сетевого флуда и L7 DoS на периметре |
+| **SIEM & Security Analytics** | **KUMA SIEM** | **Splunk Enterprise Security**, **IBM QRadar**, **Microsoft Sentinel**, **Elastic Security** | Протокол Syslog over TLS (порт 6514, RFC 5425), формат ArcSight CEF, брокер Kafka | Прием WORM-логов, корреляция всплесков Jailbreak и аномалий де-маскирования ПДн |
+| **Container & K8s Security** | **Container Security (KCS)** | **Palo Alto Prisma Cloud**, **Aqua Security**, **Sysdig Secure**, **Wiz** | Спецификации OCI Image & Runtime, K8s ValidatingWebhook, сенсор eBPF | Сканирование образов Python/vLLM на CVE до релиза, блокировка Container Escape на GPU |
+| **Storage & RAG Anti-Malware** | **Security for Storage (KSS)** | **Trend Micro Deep Security / Cloud One**, **Trellix Storage Security** | Сетевой протокол ICAP (RFC 3507), RPC / REST API объектных хранилищ | Потоковый пре-скан клиентских PDF-досье и регламентов до векторизации в Qdrant |
+| **EDR & Host Defense (GPU)** | **KATA & EDR Expert** | **CrowdStrike Falcon**, **SentinelOne Singularity**, **Microsoft Defender for Endpoint** | Модули ядра Linux (LKM), трассировка eBPF, агент системной телеметрии | Контроль целостности ядра Linux на серверах NVIDIA A100, защита видеодрайверов и CUDA |
+| **Perimeter Web WAF & Proxy** | **Web Traffic Security (KWTS)** | **Cloudflare WAF / API Shield**, **F5 BIG-IP Advanced WAF**, **Akamai App & API Protector** | Протоколы HTTP/2, WebSocket, TLS 1.3 / ГОСТ Р 34.12-2015 | Фильтрация входящих клиентских сессий, защита от сетевого флуда и L7 DoS на периметре |
 
 ---
 

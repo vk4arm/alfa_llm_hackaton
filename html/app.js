@@ -155,14 +155,14 @@ function initPortal() {
       desc: 'Оценивает логическое следование (Entailment vs Contradiction) между ответом модели и официальным RAG-регламентом банка.'
     },
     'kafka-siem': {
-      title: 'Kaspersky KUMA SIEM & WORM Trail',
+      title: 'KUMA SIEM & WORM Trail',
       sub: 'Централизованный сбор и корреляция событий ИБ (CEF)',
       icon: '🛡️',
       sla: 'P99 < 5 мс (Async Write) | 100 000+ EPS',
       tax: '0 мс (Фоновый сброс по Syslog TLS / Kafka)',
-      hw: 'Kaspersky KUMA Collector + Kafka Bus',
+      hw: 'KUMA Collector / Syslog TLS + Kafka Bus',
       sec: 'WORM (Write Once Read Many), ГОСТ Р 57580.1, 152-ФЗ, 683-П',
-      desc: 'Kaspersky Unified Monitoring and Analysis Platform (KUMA) агрегирует CEF-события шлюза (блокировки джейлбрейков, маскирование ПДн, галлюцинации NLI, переход Circuit Breaker) и запускает автоматические плейбуки реагирования SOC.'
+      desc: 'Централизованная SIEM-платформа агрегирует CEF-события шлюза (блокировки джейлбрейков, маскирование ПДн, галлюцинации NLI, переход Circuit Breaker) и запускает автоматические плейбуки реагирования SOC (совместимо со Splunk ES / IBM QRadar).'
     }
   };
 
@@ -464,7 +464,7 @@ function initPortal() {
 
           <g class="node-group" onclick="inspectNode('kafka-siem')">
             <rect x="900" y="440" width="205" height="68" class="node-box red"/>
-            <text x="918" y="468" class="node-text-title">🛡️ Kaspersky KUMA SIEM</text>
+            <text x="918" y="468" class="node-text-title">🛡️ KUMA SIEM</text>
             <text x="918" y="490" class="node-text-sub">CEF WORM Trail &amp; SOC</text>
           </g>
         </svg>
@@ -836,14 +836,14 @@ function initPortal() {
               <td>mDeBERTa-v3-base-xnli (Faithfulness > 0.85)</td>
             </tr>
             <tr>
-              <td><strong>Kaspersky KUMA SIEM</strong></td>
+              <td><strong>KUMA SIEM (совместимо со Splunk / QRadar)</strong></td>
               <td>Централизованный аудит и корреляция</td>
               <td>0 мс (Async Syslog TLS)</td>
               <td>KUMA Collector + Kafka</td>
               <td>Формат CEF, ГОСТ Р 57580.1, правила ALFA_AI_001..004</td>
             </tr>
             <tr>
-              <td><strong>Kaspersky Container Security (KCS)</strong></td>
+              <td><strong>Container Security (KCS, аналог Prisma Cloud)</strong></td>
               <td>CI/CD аудит CVE и рантайм-контроль подов</td>
               <td>Превентивно (CI/CD + Kernel)</td>
               <td>KCS Sensor Node DaemonSet</td>

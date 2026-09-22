@@ -728,7 +728,7 @@
       <span class="sec-tag" style="color: #34d399;">Раздел 4 &bull; Стек средств защиты информации</span>
       <h2 class="sec-title">Стек средств защиты и международные аналоги</h2>
       <p class="sec-desc">
-        Архитектура шлюза спроектирована по принципу вендоронезависимости (Vendor-Agnostic Interface): взаимодействие со средствами защиты осуществляется через стандартизированные протоколы (CEF/Syslog TLS, ICAP, eBPF, OCI). Это обеспечивает эффективную компенсацию рисков как средствами, развернутыми в контуре банка, так и ведущими международными решениями класса Global Tier-1.
+        Архитектура шлюза спроектирована по принципу вендоронезависимости (Vendor-Agnostic Interface): интеграция со средствами защиты реализуется через открытые стандарты — сетевые протоколы передачи данных (Syslog over TLS, ICAP, HTTP/2), форматы событий аудита (Common Event Format / CEF) и низкоуровневые интерфейсы ядра ОС и контейнеризации (подсистема eBPF, спецификации OCI). Это обеспечивает эффективную компенсацию рисков как средствами контура банка, так и ведущими международными решениями класса Global Tier-1.
       </p>
 
       <div class="kaspersky-grid">
@@ -840,7 +840,7 @@
               <th style="width: 200px;">Класс средств защиты</th>
               <th style="width: 220px;">Внедряемый компонент</th>
               <th>Международные аналоги (Global Tier-1)</th>
-              <th style="width: 240px;">Стандарт интеграции</th>
+              <th style="width: 240px;">Протоколы и механизмы интеграции</th>
             </tr>
           </thead>
           <tbody>
@@ -848,31 +848,31 @@
               <td><strong>SIEM &amp; Security Analytics</strong></td>
               <td><span style="color: #34d399; font-weight: 600;">KUMA SIEM</span></td>
               <td><strong>Splunk Enterprise Security</strong>, <strong>IBM QRadar</strong>, <strong>Microsoft Sentinel</strong>, Elastic Security</td>
-              <td>Syslog TLS (порт 6514), ArcSight CEF, Kafka</td>
+              <td>Протокол Syslog over TLS (порт 6514, RFC 5425), формат ArcSight CEF, брокер Kafka</td>
             </tr>
             <tr>
               <td><strong>Container &amp; K8s Security</strong></td>
               <td><span style="color: #34d399; font-weight: 600;">Container Security (KCS)</span></td>
               <td><strong>Palo Alto Prisma Cloud</strong>, <strong>Aqua Security</strong>, <strong>Sysdig Secure</strong>, Wiz</td>
-              <td>OCI Image Scan, eBPF sensor, K8s Admission</td>
+              <td>Спецификации OCI Image &amp; Runtime, K8s ValidatingWebhook, сенсор eBPF</td>
             </tr>
             <tr>
               <td><strong>Storage &amp; RAG Anti-Malware</strong></td>
               <td><span style="color: #34d399; font-weight: 600;">Security for Storage (KSS)</span></td>
               <td><strong>Trend Micro Deep Security / Cloud One</strong>, <strong>Trellix Storage Security</strong></td>
-              <td>ICAP Protocol, RPC Storage API</td>
+              <td>Сетевой протокол ICAP (RFC 3507), RPC / REST API объектных хранилищ</td>
             </tr>
             <tr>
               <td><strong>EDR &amp; GPU Host Defense</strong></td>
               <td><span style="color: #34d399; font-weight: 600;">KATA &amp; EDR Expert</span></td>
               <td><strong>CrowdStrike Falcon</strong>, <strong>SentinelOne Singularity</strong>, <strong>MS Defender for Endpoint</strong></td>
-              <td>Linux Kernel Module, eBPF Telemetry</td>
+              <td>Модули ядра Linux (LKM), трассировка eBPF, агент системной телеметрии</td>
             </tr>
             <tr>
               <td><strong>Edge WAF &amp; Reverse Proxy</strong></td>
               <td><span style="color: #34d399; font-weight: 600;">Web Traffic Security (KWTS)</span></td>
               <td><strong>Cloudflare WAF / API Shield</strong>, <strong>F5 BIG-IP Advanced WAF</strong>, <strong>Akamai API Protector</strong></td>
-              <td>HTTP/2, WebSocket, ГОСТ TLS 1.3</td>
+              <td>Протоколы HTTP/2, WebSocket, TLS 1.3 / ГОСТ Р 34.12-2015</td>
             </tr>
           </tbody>
         </table>
