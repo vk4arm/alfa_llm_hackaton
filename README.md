@@ -97,3 +97,31 @@
    - **NLI Cross-Encoder** (`mDeBERTa-v3` / `RuBERT`) для проверки следования ответа исходному нормативному контексту (RAG Faithfulness).
    - **Числовой аудитор** (сверка ставок, дат, сумм с исходными регламентами банка).
    - **Guided Decoding / JSON Schema** для строгой структуры ответов.
+
+---
+
+## 🛠️ Программные микросервисы (`services/`) и DevOps (`devops/`)
+
+Исходный код компонентов разбит на независимые микросервисы в папке `services/`:
+
+```
+├── devops/                      # Docker Compose, переменные окружения, оркестрация
+│   ├── docker-compose.yml
+│   ├── .env.example
+│   └── README.md
+└── services/
+    ├── gateway-core/src/        # Основной API-шлюз с SSE-стримингом (FastAPI)
+    ├── zero-pii-vault/src/      # Обезличивание по алгоритму Луна и Natasha NER
+    ├── ru-guardrails/src/       # Детектор атак (Jailbreak) и токсичности (<10 мс)
+    ├── resilience-router/src/   # Circuit Breaker и каскадный фоллбэк моделей
+    ├── semantic-cache/src/      # Семантический векторный кэш (косинусное сходство)
+    ├── nli-fact-guard/src/      # NLI Cross-Encoder и числовой фактчекинг регламентов
+    └── audit-worm-logger/src/   # Неизменяемый WORM-аудит и экспорт метрик Prometheus
+```
+
+### Локальный запуск всего стека:
+```bash
+cd devops
+cp .env.example .env
+docker-compose up -d --build
+```

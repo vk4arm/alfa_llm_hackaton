@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. CORE AI GATEWAY
+  # =========================================================================
+  gateway-core:
+    build:
+      context: ../services/gateway-core
+      dockerfile: Dockerfile
+    container_name: alfa-gateway-core
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - VLLM_TIER1_URL=http://vllm-mock:8000
+    depends_on:
+      - redis
+      - qdrant
+    networks:
+      - alfa-mesh
+
+  # =========================================================================
+  # 2. ZERO-PII VAULT (152-FZ / 395-1)
+  # =========================================================================
+  zero-pii-vault:
+    build:
+      context: ../services/zero-pii-vault
+      dockerfile: Dockerfile
+    container_name: alfa-zero-pii-vault
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SESSION_TTL_SEC=300
+    depends_on:
+      - redis
+    networks:
+      - alfa-mesh
+
+  # =========================================================================
+  # 3. RU-GUARDRAILS
+  # =========================================================================
+  ru-guardrails:
+    build:
+      context: ../services/ru-guardrails
+      dockerfile: Dockerfile
+    container_name: alfa-ru-guardrails
+    networks:
+      - alfa-mesh
+
+  # =========================================================================
+  # 4. RESILIENCE ROUTER (CIRCUIT BREAKER)
+  # =========================================================================
+  resilience-router:
+    build:
+      context: ../services/resilience-router
+      dockerfile: Dockerfile
+    container_name: alfa-resilience-router
+    networks:
+      - alfa-mesh
+
+  # =========================================================================
+  # 5. SEMANTIC CACHE
+  # =========================================================================
+  semantic-cache:
+    build:
+      context: ../services/semantic-cache
+      dockerfile: Dockerfile
+    container_name: alfa-semantic-cache
+    depends_on:
+      - qdrant
+    networks:
+      - alfa-mesh
+
+  # =========================================================================
+  # 6. NLI FACT GUARD
+  # =========================================================================
+  nli-fact-guard:
+    build:
+      context: ../services/nli-fact-guard
+      dockerfile: Dockerfile
+    container_name: alfa-nli-fact-guard
+    networks:
+      - alfa-mesh
+
+  # =========================================================================
+  # 7. AUDIT WORM LOGGER
+  # =========================================================================
+  audit-worm-logger:
+    build:
+      context: ../services/audit-worm-logger
+      dockerfile: Dockerfile
+    container_name: alfa-audit-worm-logger
+    networks:
+      - alfa-mesh
+
+  # =========================================================================
+  # INFRASTRUCTURE: REDIS & QDRANT
+  # =========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: alfa-redis-vault
+    ports:
+      - "6379:6379"
+    networks:
+      - alfa-mesh
+
+  qdrant:
+    image: qdrant/qdrant:v1.8.0
+    container_name: alfa-qdrant-cache
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    networks:
+      - alfa-mesh
+
+networks:
+  alfa-mesh:
+    driver: bridge
