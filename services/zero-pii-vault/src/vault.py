@@ -15,11 +15,22 @@ except ImportError:
     from masker import NatashaPIIMasker, luhn_checksum_valid, validate_inn
 
 class ZeroPiiVault:
-    def __init__(self, redis_client=None, session_ttl_sec: int = 300, granular_address: bool = False):
+    """
+    Основной фасад сервиса Zero-PII Vault для асинхронного и синхронного маскирования.
+    Управляет жизненным циклом сессий, временным кэшем токенов (Redis или in-memory)
+    и гарантирует необратимость утечки в LLM и 100% обратимость ответа клиенту.
+    """
+    def __init__(
+        self,
+        redis_client=None,
+        session_ttl_sec: int = 300,
+        granular_address: bool = False,
+        config=None
+    ):
         self.redis = redis_client
         self.session_ttl_sec = session_ttl_sec
         self.memory_store: Dict[str, Dict[str, str]] = {}
-        self.masker = NatashaPIIMasker(granular_address=granular_address)
+        self.masker = NatashaPIIMasker(config=config, granular_address=granular_address)
 
     def mask_text(self, text: str, session_id: Optional[str] = None) -> Tuple[str, str, Dict[str, str]]:
         """

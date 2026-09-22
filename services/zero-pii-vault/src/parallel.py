@@ -1,9 +1,9 @@
 """
-Parallel Multi-Core PII Masker (Zero-PII Vault)
-Optimized for multi-core CPUs using multiprocessing without GIL contention.
+Многоядерный параллельный процессор маскирования ПДн (Zero-PII Vault).
+Оптимизирован для многопроцессорных серверов без конфликтов за блокировку GIL.
 
-Provides high-throughput batch and streaming masking/unmasking of personal data
-and banking secrecy (152-FZ, 395-1) across N worker processes.
+Обеспечивает высокую пропускную способность пакетной обработки обращений клиентов
+и банковской тайны (152-ФЗ, 395-1) на пуле из N рабочих процессов.
 """
 
 import os
@@ -12,14 +12,15 @@ import uuid
 from typing import List, Tuple, Dict, Optional
 from concurrent.futures import ProcessPoolExecutor
 
-# Set single-threaded linear algebra backends to prevent thread thrashing in child processes
+# Принудительное ограничение внутренних потоков линейной алгебры BLAS/MKL
+# до 1 потока на процесс во избежание деградации производительности от трэшинга ядер CPU
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
-# Support relative and absolute imports
+# Поддержка как относительного, так и абсолютного импорта
 try:
     from .masker import NatashaPIIMasker
 except ImportError:
@@ -29,12 +30,11 @@ _worker_masker: Optional[NatashaPIIMasker] = None
 
 def _init_masker_worker(granular_address: bool = False):
     """
-    Initializer executed once per worker process upon startup.
-    Preloads Natasha embedding models, dictionaries, and compiled regexes.
-    Subsequent tasks execute with zero cold-start overhead.
+    Инициализатор рабочего процесса: выполняется ровно 1 раз при старте воркера.
+    Загружает конфигурацию из YAML, эмбеддинги Natasha и скомпилированные регулярные выражения.
+    Последующая обработка документов происходит с нулевым временем холодного старта.
     """
     global _worker_masker
-    # Enforce thread confinement inside each spawned process
     os.environ["OMP_NUM_THREADS"] = "1"
     os.environ["OPENBLAS_NUM_THREADS"] = "1"
     os.environ["MKL_NUM_THREADS"] = "1"
