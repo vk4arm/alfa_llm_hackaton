@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. REDIS: Ephemeral In-Memory Session Cache (Limited to 1 CPU Core)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: zero-pii-redis
+    cpus: 1.0
+    command: >
+      redis-server
+      --save ""
+      --appendonly no
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - pii-net
+
+  # ---------------------------------------------------------------------------
+  # 2. ZERO-PII VAULT: FastAPI Server (Limited to 3 CPU Cores)
+  # ---------------------------------------------------------------------------
+  zero-pii-vault:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zero-pii-vault
+    cpus: 3.0
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - VAULT_WORKERS=3
+      - VAULT_MAX_CONCURRENCY=256
+      - VAULT_LOG_FILE=/var/logs/alfapii.log
+      - PORT=8000
+      - HOST=0.0.0.0
+    volumes:
+      - ./logs:/var/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - pii-net
+
+networks:
+  pii-net:
+    driver: bridge

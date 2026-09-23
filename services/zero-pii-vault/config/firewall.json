@@ -1,0 +1,14 @@
+[
+  {
+    "name": "global_access",
+    "subnet": "all"
+  },
+  {
+    "name": "internal_banking_core",
+    "subnet": "10.0.0.0/8"
+  },
+  {
+    "name": "local_dev",
+    "subnet": "127.0.0.1/32"
+  }
+]
