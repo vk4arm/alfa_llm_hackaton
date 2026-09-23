@@ -15,6 +15,35 @@ settings:
   # Размер контекстного окна (в символах) до и после имени для анализа интентов
   context_window_chars: 80
 
+  # Включение/отключение маскирования конкретных типов ПДн и сущностей
+  enabled_masks:
+    card: true
+    inn: true
+    email: true
+    phone: true
+    cvv: true
+    pin: true
+    cardholder: true
+    driver_license: true
+    passport_code: true
+    passport: true
+    passport_issuer: true
+    passport_date: true
+    citizenship: true
+    birth_date: true
+    birth_place: true
+    address: true
+    loc: true
+    org: true
+    person: true
+    identity_person: true
+    foreign_passport: true
+    belarus_passport: true
+    cis_passport: true
+    israel_passport: true
+    military_id: true
+    birth_cert: true
+
 # ------------------------------------------------------------------------------
 # 1. Регулярные выражения для распознавания категорий ПДн
 # ------------------------------------------------------------------------------

@@ -7,18 +7,20 @@
 """
 
 import os
-import sys
-import uuid
 from typing import List, Tuple, Dict, Optional
 from concurrent.futures import ProcessPoolExecutor
 
 # Принудительное ограничение внутренних потоков линейной алгебры BLAS/MKL
 # до 1 потока на процесс во избежание деградации производительности от трэшинга ядер CPU
-os.environ["OMP_NUM_THREADS"] = "1"
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-os.environ["MKL_NUM_THREADS"] = "1"
-os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
-os.environ["NUMEXPR_NUM_THREADS"] = "1"
+def _set_blas_threads():
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
+
+_set_blas_threads()
 
 # Поддержка как относительного, так и абсолютного импорта
 try:
@@ -35,11 +37,7 @@ def _init_masker_worker(granular_address: bool = False):
     Последующая обработка документов происходит с нулевым временем холодного старта.
     """
     global _worker_masker
-    os.environ["OMP_NUM_THREADS"] = "1"
-    os.environ["OPENBLAS_NUM_THREADS"] = "1"
-    os.environ["MKL_NUM_THREADS"] = "1"
-    os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
-    os.environ["NUMEXPR_NUM_THREADS"] = "1"
+    _set_blas_threads()
     _worker_masker = NatashaPIIMasker(granular_address=granular_address)
 
 def _worker_mask_task(task_data: Tuple[int, str, Optional[str]]) -> Tuple[int, str, str, Dict[str, str]]:

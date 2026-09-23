@@ -6,13 +6,11 @@ Integrates high-speed algorithmic validators and Natasha NER for complete
 Russian personal identifiable information (PII) detection and redaction.
 """
 
-import os
-import uuid
-from typing import Dict, Tuple, List, Optional
+from typing import Dict, Tuple, Optional
 try:
-    from .masker import NatashaPIIMasker, luhn_checksum_valid, validate_inn
+    from .masker import NatashaPIIMasker
 except ImportError:
-    from masker import NatashaPIIMasker, luhn_checksum_valid, validate_inn
+    from masker import NatashaPIIMasker
 
 class ZeroPiiVault:
     """
@@ -45,7 +43,8 @@ class ZeroPiiVault:
             try:
                 import json
                 self.redis.setex(f"pii_session:{session_id}", self.session_ttl_sec, json.dumps(mapping))
-            except Exception:
+            except Exception as e:
+                print("Error:", e)
                 self.memory_store[session_id] = mapping
         else:
             self.memory_store[session_id] = mapping
@@ -63,7 +62,8 @@ class ZeroPiiVault:
                 raw = self.redis.get(f"pii_session:{session_id}")
                 if raw:
                     mapping = json.loads(raw)
-            except Exception:
+            except Exception as e:
+                print("Error:", e)
                 mapping = self.memory_store.get(session_id, {})
         else:
             mapping = self.memory_store.get(session_id, {})
@@ -75,7 +75,7 @@ class ZeroPiiVault:
         if self.redis:
             try:
                 self.redis.delete(f"pii_session:{session_id}")
-            except Exception:
-                pass
+            except Exception as e:
+                print("Exception caught:", e)
         if session_id in self.memory_store:
             del self.memory_store[session_id]

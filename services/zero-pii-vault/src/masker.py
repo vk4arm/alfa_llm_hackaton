@@ -54,6 +54,10 @@ RE_CLEAN_NAME_SUFFIX = re.compile(r'\s+\b(?:по|в|на|и|с|о|от|к|для
 RE_ISSUER_PREFIX = re.compile(r'^(?:его\s+|в\s+|через\s+)+', re.IGNORECASE)
 RE_ADDR_PREFIX = re.compile(r'^(?:сейчас\s+|по\s+адресу\s+|в\s+|на\s+адрес\s+|на\s+)+', re.IGNORECASE)
 RE_ADDR_SUFFIX = re.compile(r'(?:,\s*(?:хотя|паспорт|прописан|тел|но|к/п|код|выдан).*)$', re.IGNORECASE)
+RE_BUILDING_SUFFIX = re.compile(
+    r'^(?:[,\s]+(?:д(?:\.|ом)?|вл(?:\.|адение)?|корп(?:\.|ус)?|к(?:\.)?|стр(?:\.|оение)?|оф(?:\.|ис)?|кв(?:\.|артира)?)\s*[:\-–—]?\s*\d+[a-zA-Zа-яА-Я0-9\-/]*(?:[,\s]+(?:кв(?:\.|артира)?|оф(?:\.|ис)?|комн?(?:\.)?)\s*[:\-–—]?\s*\d+)?)+',
+    re.IGNORECASE
+)
 RE_TOKEN_PATTERN = re.compile(r'\[[A-Z0-9_]+\]')
 
 
@@ -471,14 +475,60 @@ class NatashaPIIMasker:
                 add_span(st, en, 'FIO', val)
 
         # --------------------------------------------------------------------------
-        # ЭТАП 2: Нейросетевое извлечение ФИО (PER) через Natasha + слияние спанов
+        # ЭТАП 2: Нейросетевое извлечение PER, LOC (ADDRESS) и ORG через Natasha
         # --------------------------------------------------------------------------
-        per_spans = []
-        if self.enabled_masks.get("person", True):
+        need_ner = (
+            self.enabled_masks.get("person", True)
+            or self.enabled_masks.get("address", True)
+            or self.enabled_masks.get("loc", True)
+            or self.enabled_masks.get("org", True)
+        )
+        if need_ner:
             doc = Doc(text)
             doc.segment(self.segmenter)
             doc.tag_ner(self.ner_tagger)
-            per_spans = [s for s in doc.spans if s.type == 'PER']
+
+            # 2.1 Извлечение локаций (LOC / ADDRESS) с привязкой номеров домов/квартир
+            if self.enabled_masks.get("address", True) or self.enabled_masks.get("loc", True):
+                loc_spans = [s for s in doc.spans if s.type == 'LOC']
+                for s in loc_spans:
+                    st = s.start
+                    en = s.stop
+                    # Проверяем контекст метафоры/роли
+                    prefix = text[max(0, st - self.context_window_chars):st]
+                    clause_prefix = RE_CLAUSE_SPLIT.split(prefix.split('\n')[-1])[-1]
+                    has_metaphor = bool(self.metaphor_pattern.search(clause_prefix)) if self.metaphor_pattern else False
+
+                    # Проверяем, есть ли сразу за локацией номер дома / строения / квартиры
+                    rest = text[en:]
+                    m_suffix = RE_BUILDING_SUFFIX.match(rest)
+                    if m_suffix:
+                        en += len(m_suffix.group(0))
+                    elif has_metaphor:
+                        # Внутри чистого ролевого промпта ("рассуждай о Кавказе") абстрактные топонимы не маскируем
+                        continue
+
+                    val = text[st:en].strip()
+                    add_span(st, en, 'ADDRESS', val)
+
+            # 2.2 Извлечение организаций (ORG)
+            if self.enabled_masks.get("org", True):
+                org_spans = [s for s in doc.spans if s.type == 'ORG']
+                for s in org_spans:
+                    prefix = text[max(0, s.start - self.context_window_chars):s.start]
+                    clause_prefix = RE_CLAUSE_SPLIT.split(prefix.split('\n')[-1])[-1]
+                    has_metaphor = bool(self.metaphor_pattern.search(clause_prefix)) if self.metaphor_pattern else False
+                    if has_metaphor:
+                        continue
+
+                    val = s.text.strip()
+                    if val and len(val) >= 2:
+                        add_span(s.start, s.stop, 'ORG', val)
+
+            # 2.3 Извлечение персон (PER)
+            per_spans = [s for s in doc.spans if s.type == 'PER'] if self.enabled_masks.get("person", True) else []
+        else:
+            per_spans = []
 
         # Слияние соседних фрагментов ФИО, если они разделены лишь пробелами
         merged_spans: List[Tuple[int, int, str]] = []
@@ -529,14 +579,23 @@ class NatashaPIIMasker:
         mapping: Dict[str, str] = {}
         counters: Dict[str, int] = {}
 
-        result_chars = list(text)
-        for start, end, label, _ in reversed(spans):
+        pieces: List[str] = []
+        last_idx = 0
+
+        # Сортируем по возрастанию координат для прямого линейного прохода O(N)
+        sorted_spans = sorted(spans, key=lambda s: s[0])
+        for start, end, label, _ in sorted_spans:
+            if start < last_idx:
+                continue
+            pieces.append(text[last_idx:start])
             counters[label] = counters.get(label, 0) + 1
             token = f"[{label}_{counters[label]}]"
             mapping[token] = text[start:end]
-            result_chars[start:end] = list(token)
+            pieces.append(token)
+            last_idx = end
 
-        masked_text = "".join(result_chars)
+        pieces.append(text[last_idx:])
+        masked_text = "".join(pieces)
         return masked_text, session_id, mapping
 
     def mask(self, text: str, session_id: Optional[str] = None) -> Tuple[str, str, Dict[str, str]]:
