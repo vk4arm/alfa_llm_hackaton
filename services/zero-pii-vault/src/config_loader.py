@@ -35,7 +35,21 @@ class VaultConfig:
     
     # General vault settings
     granular_address: bool = False
+    enabled_masks: Dict[str, bool] = field(default_factory=dict)
     context_window_chars: int = 80
+
+    # Server and redis settings
+    host: str = "0.0.0.0"
+    port: int = 8000
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    session_ttl: int = 300
+    vault_workers: int = 3
+    vault_max_concurrency: int = 2000
+    use_process_pool: bool = False
+    vault_span_cache_size: int = 20000
+    vault_log_file: str = "zero-pii-vault.log"
+    slovnet_onnx_path: str = "/tmp/slovnet_cnn.onnx"
 
     def get_pattern(self, name: str) -> Pattern:
         """Retrieves a pre-compiled regular expression by its configuration name."""
@@ -102,7 +116,24 @@ def load_vault_config(config_dir: Optional[str] = None, force_reload: bool = Fal
 
     # Extract raw patterns and settings
     raw_patterns: Dict[str, str] = rules_data.get("patterns", {})
+
     settings: Dict[str, Any] = rules_data.get("settings", {})
+    server_settings = rules_data.get("server", {})
+
+    host = server_settings.get("host", os.getenv("HOST", "0.0.0.0"))
+    port = int(server_settings.get("port", os.getenv("PORT", "8000")))
+    redis_host = server_settings.get("redis_host", os.getenv("REDIS_HOST", "localhost"))
+    redis_port = int(server_settings.get("redis_port", os.getenv("REDIS_PORT", "6379")))
+    session_ttl = int(server_settings.get("session_ttl", os.getenv("PII_SESSION_TTL", "300")))
+    vault_workers = int(server_settings.get("vault_workers", os.getenv("VAULT_WORKERS", "3")))
+    vault_max_concurrency = int(server_settings.get("vault_max_concurrency", os.getenv("VAULT_MAX_CONCURRENCY", "2000")))
+    use_process_pool = server_settings.get("use_process_pool", os.getenv("USE_PROCESS_POOL", "false")).lower() == "true" if isinstance(server_settings.get("use_process_pool", os.getenv("USE_PROCESS_POOL", "false")), str) else bool(server_settings.get("use_process_pool", False))
+    vault_span_cache_size = int(server_settings.get("vault_span_cache_size", os.getenv("VAULT_SPAN_CACHE_SIZE", "20000")))
+    vault_log_file = server_settings.get("vault_log_file", os.getenv("VAULT_LOG_FILE", "zero-pii-vault.log"))
+    
+    import tempfile
+    slovnet_onnx_path = server_settings.get("slovnet_onnx_path", os.getenv("SLOVNET_ONNX_PATH", os.path.join(tempfile.gettempdir(), "slovnet_cnn.onnx")))
+
     raw_metaphor = rules_data.get("metaphor", "")
     raw_banking = rules_data.get("banking_intent", "")
     
@@ -111,7 +142,7 @@ def load_vault_config(config_dir: Optional[str] = None, force_reload: bool = Fal
     famous_exact = set(e.lower().strip() for e in famous_data.get("exact_names", []))
 
     # Pre-compile all regexes for performance
-    compiled_patterns: Dict[str, Pattern] = {}
+    compiled_patterns = {}
     for name, pat_str in raw_patterns.items():
         try:
             compiled_patterns[name] = re.compile(pat_str)
@@ -130,7 +161,19 @@ def load_vault_config(config_dir: Optional[str] = None, force_reload: bool = Fal
         famous_person_bases=famous_bases,
         famous_persons=famous_exact,
         granular_address=settings.get("granular_address", False),
-        context_window_chars=settings.get("context_window_chars", 80)
+        context_window_chars=settings.get("context_window_chars", 80),
+        enabled_masks=settings.get("enabled_masks", {}),
+        host=host,
+        port=port,
+        redis_host=redis_host,
+        redis_port=redis_port,
+        session_ttl=session_ttl,
+        vault_workers=vault_workers,
+        vault_max_concurrency=vault_max_concurrency,
+        use_process_pool=use_process_pool,
+        vault_span_cache_size=vault_span_cache_size,
+        vault_log_file=vault_log_file,
+        slovnet_onnx_path=slovnet_onnx_path
     )
 
     if config_dir is None:
